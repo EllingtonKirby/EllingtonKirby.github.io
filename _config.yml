@@ -26,6 +26,7 @@ logo: /assets/img/Ellington.jpg
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
+  - jekyll-sitemap
 
 show_downloads: true
 
