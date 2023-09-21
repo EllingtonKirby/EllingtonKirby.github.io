@@ -27,6 +27,7 @@ plugins:
   - jekyll-feed
   - jekyll-remote-theme
   - jekyll-sitemap
+  - jekyll-seo-tag
 
 show_downloads: true
 
