@@ -2,15 +2,15 @@
 layout: default
 ---
 
-# Welcome!
+# About Me
 
-I am a former Software Engineer and current Machine Learning Student. I have worked at large and medium sized companies like FanDuel and Snap Inc, as well as small startups and agencies. 
+I am a former Software Engineer and current Machine Learning Student. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. 
 
 In 2019 I moved to Paris to learn French and eat way too many French pastries. 
 
 In 2022 I returned to school to pursue a Masters in Machine Learning at PSL Research University. 
 
-Currently I am working as a research intern at Université Gustave Eiffel where I am developing unsupervised learning methods and applying them to traffic engineering problems.
+I have worked as a research intern at Université Gustave Eiffel where I developed unsupervised learning methods and applied them to traffic engineering problems.
 
 I am open to talking about any projects in Machine Learning in research or industry. I like to get my hands dirty with complex software systems and build cool stuff.
 
@@ -20,13 +20,13 @@ I hope to use this space to show off what I have built and talk about some ideas
 
 ### Graph Clustering to Identify Road Networks with Similar Traffic Behaviors
 
-As part of the GRETTIA Lab at Université Gustave Eiffel I am working to adapt the Leiden Algorithm to cluster road networks.
-The goal is to find streets which experience similar levels of traffic during peak hours. 
+As part of the GRETTIA Lab at Université Gustave Eiffel I am worked to adapt the Leiden Algorithm to cluster road networks.
+The goal was to identify the temporal evolution of congestion conditions via clustering similar streets.
 
-Here is a cool image of the Barcelona network clustered by my aglorithm. The colored clusters represent groups of roads identified to have similar levels of congestion and average speed. The algorithm I developed out performed several common methods of graph clustering.
+Here is an image of the Barcelona road network clustered by my aglorithm. The colored clusters represent groups of roads identified to have similar levels of congestion and average speed.
 ![Barcelona Clustering](/assets/img/base_clustering_results.png)
 
-Ultimately I applied this method over a full day of data to evaluate how these clusters change with traffic demand. My method can be viewed on my github [here](https://github.com/EllingtonKirby/leidenalg/) (still in progress)
+I applied this method over a full day of data to evaluate how these clusters change with traffic demand. My method can be viewed on my github [here](https://github.com/EllingtonKirby/leidenalg/) 
 
 ### Vehicle Trajectory Generation and Prediction Using RNNs
 
