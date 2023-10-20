@@ -4,9 +4,9 @@ layout: default
 
 # About Me
 
-I am a former Software Engineer and current Machine Learning Student. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. 
+I am a former Software Engineer and current Machine Learning Student. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. I am passionate about Deep Learning, specificially encoder-decoder architectures and their application to generative tasks. 
 
-In 2019 I moved to Paris to learn French and eat way too many French pastries. 
+In 2019 I moved to Paris to learn French, work at Zenly, and eat way too many French pastries. 
 
 In 2022 I returned to school to pursue a Masters in Machine Learning at PSL Research University. 
 
@@ -32,6 +32,8 @@ I applied this method over a full day of data to evaluate how these clusters cha
 
 In concert with data gathered by the CIRCLES Consortium at UC Berkely, I worked to develop encoder decoder and sequence models to predict and generate vehicle trajectories.
 One such experiment can be found [here](https://github.com/EllingtonKirby/VTP-LSTM/tree/master/Ellington-LSTM) where I implemented Lin et al. grid discretized LSTM model for trajectory prediction.
+
+I also conducted a literature review of encoder-decoder models for the task of Trajectory Generation. The goal of the project was to syntehsize realistic and data driven traffic scenarios using the data captured during a live traffic test. The new scenarios would be simulated in a traffic simulation and would enable fast iteration and testing of traffic control patterns. Generally I focused on Variational Auto Encoders. 
 
 ### Fine Tuning BERT Models for Bio Medical Tasks
 
