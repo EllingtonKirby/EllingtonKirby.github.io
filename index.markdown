@@ -4,7 +4,7 @@ layout: default
 
 # About Me
 
-I am a former Software Engineer and current Machine Learning Student. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. I am passionate about Deep Learning, specificially encoder-decoder architectures and their application to generative tasks. 
+I am a former Software Engineer and current Machine Learning Student. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. I am passionate about Deep Learning and Computer Vision, specifically self supervised contrastive learning, generative models such as VAEs, GANs, and Diffusion models. I am interested in improving learned image representations for multi modal tasks, such as vision-language models, potentially via self supervised learning.
 
 In 2019 I moved to Paris to learn French, work at Zenly, and eat way too many French pastries. 
 
@@ -16,7 +16,15 @@ I am open to talking about any projects in Machine Learning in research or indus
 
 I hope to use this space to show off what I have built and talk about some ideas I have for the future!
 * * *
-## Research Experience
+## Projects
+
+### Evaluating the effect of Differential Data Augmentations on a simple GAN Model
+
+As part of a PSL competetion to maximize the FID and precision/recall results on a constrained GAN example, I chose to implement a differential data augmentation pipeline. The resulting FID score of 20 on the MNIST dataset was drastically improved, and required no changes to the model architecture.
+
+### Pretraining Word Embeddings via Word2Vec
+
+To learn more about language modelling and self supervised training, I implemented a masked language modelling training regime to train Word2Vec word embeddings. I then tested the impact of these embeddings on a sentiment analysis task using the CNN-Static text convolution network [github](https://github.com/EllingtonKirby/Word2Vec). 
 
 ### Graph Clustering to Identify Road Networks with Similar Traffic Behaviors
 
@@ -37,8 +45,7 @@ I also conducted a literature review of encoder-decoder models for the task of T
 
 ### Fine Tuning BERT Models for Bio Medical Tasks
 
-As a research assistant for Guilhem Piat, I worked to develop a pipeline of scripts to fine tune and benchmark BERT models on Bio Medical QA tasks. 
-The work was included in the paper "Intégration de connaissances structurées par synthèse de texte spécialisé" (Integration of structured knowledge through specialized text synthesis)[link](https://hal.science/hal-04130151/). I built tokenization and embedding pipelines for PubMedQA and MedMCQA tasks. 
+Second author on "Intégration de connaissances structurées par synthèse de texte spécialisé" (Integration of structured knowledge through specialized text synthesis)[link](https://hal.science/hal-04130151/). I built tokenization and embedding pipelines for PubMedQA and MedMCQA tasks. I worked to develop a pipeline of scripts to fine tune and benchmark bi-directional language models on Bio Medical QA tasks. 
 
 ### Comparison of Topic Modeling Methods on Fake News
 
@@ -49,7 +56,7 @@ I was extremely impressed by the effectiveness of KMeans on this task, where clu
 
 ### Audio Localization Using Time Difference of Arrival
 
-My first exposure to research was [smartphone based audio localization using time difference of arrival](https://dl.acm.org/doi/abs/10.1145/2973750.2985625) where I implemented a demo of my Binghamton Professor's paper [Snooping Keystrokes with mm-level Audio Ranging on a Single Phone](https://dl.acm.org/doi/abs/10.1145/2789168.2790122). This project is also what gave me my first exposure to Android, and after demonstrating the project at Mobicom (which was really an eye opening experience) I was able to start my software engineering career. 
+My first exposure to research was as the first author on [smartphone based audio localization using time difference of arrival](https://dl.acm.org/doi/abs/10.1145/2973750.2985625) where I implemented a demo of [Snooping Keystrokes with mm-level Audio Ranging on a Single Phone](https://dl.acm.org/doi/abs/10.1145/2789168.2790122). This project is also what gave me my first exposure to Android, and after demonstrating the project at Mobicom I started my software engineering career. 
 
 * * *
 ## Work Experience
