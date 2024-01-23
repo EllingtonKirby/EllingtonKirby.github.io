@@ -2,8 +2,6 @@
 layout: default
 ---
 
-# About Me
-
 I am a former Software Engineer and current Machine Learning Student. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. I am passionate about Deep Learning and Computer Vision, specifically self supervised contrastive learning, generative models such as VAEs, GANs, and Diffusion models. I am interested in improving learned image representations for multi modal tasks, such as vision-language models, potentially via self supervised learning.
 
 In 2019 I moved to Paris to learn French, work at Zenly, and eat way too many French pastries. 
@@ -17,16 +15,19 @@ I am open to talking about any projects in Machine Learning in research or indus
 I hope to use this space to show off what I have built and talk about some ideas I have for the future!
 * * *
 ## Projects
+### [ELECTRA Implementation](https://github.com/EllingtonKirby/Electra-Implementation)
 
-### Evaluating the effect of Differential Data Augmentations on a simple GAN Model
+Implementation of ELECTRA-Small discriminator and replaced token detection training objective. Pre-trained a toy example on a language identification task and tested against a fine tuned model without pre-training to demonstrate effectiveness of ELECTRA objective even in data limited settings.
+
+### RAG Pipeline to Augment Internship Dataaset
+
+Scraped available internships and their metadata from a variety of sources. Fed cleaned and stored internship metadata to a Retrieval Augmented Generation pipeline to extract and generate keywords and summaries from PDF descriptions.
+
+### Evaluating the effect of Differential Data Augmentations on GANs
 
 As part of a PSL competetion to maximize the FID and precision/recall results on a constrained GAN example, I chose to implement a differential data augmentation pipeline. The resulting FID score of 20 on the MNIST dataset was drastically improved, and required no changes to the model architecture.
 
-### Pretraining Word Embeddings via Word2Vec
-
-To learn more about language modelling and self supervised training, I implemented a masked language modelling training regime to train Word2Vec word embeddings. I then tested the impact of these embeddings on a sentiment analysis task using the CNN-Static text convolution network [github](https://github.com/EllingtonKirby/Word2Vec). 
-
-### Graph Clustering to Identify Road Networks with Similar Traffic Behaviors
+### [Graph Clustering to Identify Road Networks with Similar Traffic Behaviors](https://github.com/EllingtonKirby/Contiguity-Constrained-Clustering)
 
 As part of the GRETTIA Lab at Université Gustave Eiffel I am worked to adapt the Leiden Algorithm to cluster road networks.
 The goal was to identify the temporal evolution of congestion conditions via clustering similar streets.
@@ -47,7 +48,7 @@ I also conducted a literature review of encoder-decoder models for the task of T
 
 Second author on "Intégration de connaissances structurées par synthèse de texte spécialisé" (Integration of structured knowledge through specialized text synthesis)[link](https://hal.science/hal-04130151/). I built tokenization and embedding pipelines for PubMedQA and MedMCQA tasks. I worked to develop a pipeline of scripts to fine tune and benchmark bi-directional language models on Bio Medical QA tasks. 
 
-### Comparison of Topic Modeling Methods on Fake News
+### [Topic Modeling of "Fake News" Articles](https://github.com/EllingtonKirby/Fake-News-Classification)
 
 Using a variety of Kaggle Fake News detection datasets, I benchmarked preprocessing, embedding, and dimensionality reduction strategies for three clustering algorithms to evaluate their effectiveness of modeling topics in Fake News. The methods were KMeans with Latent Semantic Analysis, Non-Negative Matrix Factorization, and Latent Dirichilet Allocation. 
 
