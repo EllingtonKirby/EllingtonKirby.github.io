@@ -4,90 +4,108 @@ layout: default
 
 # Interpreting Interpretability
 
-Recently, the artificial intelligence company Anthropic published an interesting article "mapping the mind" of a large language model (link [here](https://www.nytimes.com/2024/05/21/technology/ai-language-models-anthropic.html)). I have seen a lot of dicussion of the paper, a lot of it from a technical level, but also a lot of interest from a non-technical audience. This makes sense, everyone has tried something like ChatGPT at this point (if not try Claude out [here](https://www.anthropic.com/claude)), and we've all heard the statements about the immense impact AI will have on our everyday lives. 
 
-As this technology becomes more and more widespread, I believe it is vital to explain the ins and outs of artificial intelligence systems to as broad an audience as possible. This paper from Anthropic touches on the very interesting question of "why did this language model repsond in this way" and I think it is a great place to dig deeper and hopefully provide a deeper understanding of these systems for an audience a little less in the weeds on the subject. 
+Recently, the artificial intelligence company Anthropic published a research paper in which they "map the mind" of a large language model (a NYTimes summary of it was written [here](https://www.nytimes.com/2024/05/21/technology/ai-language-models-anthropic.html)). There has been a lot of dicussion of the paper, a lot of it from a technical level, but also a lot of interest from a non-technical audience. This makes sense, most of us have tried LLM like ChatGPT at this point (if not try Claude out [here](https://www.anthropic.com/claude)), and we've all heard the statements about the immense impact AI will have on our everyday lives. 
 
-This blog post aims to explain the paper to as broadly an audience as possible, and as such will rely on a bit of analogy and hand waiving over the deeper mathemetical parts. Truthfully, understanding the math is not necessary for having a good working understanding of what is happening inside an LLM, why we call them "black boxes", and why the work Anthropic presented in their paper is particularly interesting. 
+Why is "mapping the mind" of a large language model interesting? The image below shows one of the key results of the paper: the authors identified the part of the model that seems to control how emphatically agreeing the model will be in its responses. Controlling this part of the model changes how it behaves, making the model spin an obvious untruth just to praise the human. 
 
-I think that every person has the ability to understand what is going on inside an AI without taking 2 years of math classes. There is no better way to make these systems worthy of trust than making them understood. 
+This type of result can allow us a much deeper and clearer understanding of the artificial intelligence quickly weaving its way into our everyday lives. This is because these models are more or less "black boxes", meaning that we don't have a clear explanation of why the model gives a particular response to any input. We will see why solving this problem is  so difficult, and further explore what the Antropic team were able to uncover. 
+
+![alt text](sycophantic_praise.png)
+
+This blog post aims to explain the paper to as broadly an audience as possible, and as such will rely on a bit of analogy and hand waiving over the deeper mathemetical parts. Truthfully, understanding the math is not necessary for having a good working understanding of what is happening inside an LLM, why we call them "black boxes", and why the work Anthropic presented in their paper is particularly interesting. And there is no better way to make these systems worthy of trust than making them understood. 
 
 However, if you are interested in getting a deeper, mathemtical understanding of these sytems, here are some links to get your started:
 - 3Blue1Brown on YouTube has an excellently made series of videos explaining Neural Networks: [link](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
 - Andrej Karpathy is undoubtably the GOAT (greatest of all time) public educator on artificial intelligence, and his channel is a great resource: [link](https://www.youtube.com/@AndrejKarpathy)
 
-The paper from Anthropic is officially titled "Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet". Wow! There are some big words in there. But moving past the jargon, the title is basically saying: "we built a technique for understanding how LLMs reason, we improve that technique, and we use it to interpret how an LLM used by millions of people understand and generates text". I hope that by the end of this blog post you are feeling more confident in your understanding of how an LLM works, so lets get started.
+The paper from Anthropic published on May 21 2024, is officially titled "Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet". 
+
+Wow! There are some big words in there. But moving past the jargon, the title is basically saying: "we built a technique for understanding how LLMs reason, we improve that technique, and we use it to interpret how an LLM used by millions of people understand and generates text". I hope that by the end of this blog post you have a clearer understanding of what the Anthropic team achieved, and why it is significant, so let's get started.
 
 ## Background
 
 The model that was examined in the Anthropic paper is called Claude 3 Sonnet. It is from a family of LLMs produced by Anthropic with a wide variety of impressive capabilities. If you have tried ChatGPT, you can think of Sonnet as better than ChatGPT 3.5 (what was the free version for a long time) but less powerful than the paid version of ChatGPT. 
 
-When something is called a "large" language model, it is large in a variety of ways. The model has read millions and millions of pieces of text during its training. The model itself is also "large" in the number of numbers inside it. One of the most impressive things about LLMs is that even though we hear huge statistics about a model's "parameter count", the size of the model in terms of memory on a computer is still many many times lower than the size of all the data it has read.
+When something is called a "large" language model, it is large in a variety of ways. The model has read millions and millions of pieces of text during its training. The model itself is also "large" in the quantity of numbers inside its brain, called the weights or paramters of the model.
 
-Claude 3 Sonnet is a neural network. The mathematical nature of a neural network is a fascinating topic, but actually not at all necessary for understanding the paper. We can think of a neural network as a pipe having three parts:
+Claude 3 Sonnet and all other LLMs are also neural networks. We can think of a neural network as a pipe having three parts:
+
 - It takes an input. This can be a picture, an audio file, or a piece of text (which is what an LLM receives). This goes "into the pipe".
-- It transforms the input into a number, then runs a massive series of simple mathematical operations (things like addition and multiplication) on that number.
+- It transforms the input into a number, then runs a massive series of simple mathematical operations (things like addition and multiplication) on that number using its parameters.
 - Finally it finishes that series of mathematical operations, and spits out an ouput. In the case of an LLM, this is a word, specifically the word that the model predicts will come after the series of text it saw as input. 
 
-This process of putting in text and getting out text is repeated millions and millions of times while the model is trained. Each time, those numbers inside the model that are used for the mathematical operations are slightly updated, and over time the model improves in its task, which in an LLM is to predict the next word correctly.
+The neural network is then trained. In this process the model repeatedly takes a phrase as input and then predicts what it believes the next word in the phrase to be. The numbers inside the model, again the paramters or weights, are then updated so that the model makes the correct prediction more often. 
 
-The crucial thing to realize here, is that those numbers inside the model (what we call the "parameters") are impossible to interpret on their own. 
+The crucial thing to realize here, is that those numbers inside the model are impossible to interpret on their own. 
 
-Below is an example of what might be found inside a very small neural network (Claude 3 Sonnet has many millions as times as many parameters). Each of these grids is a matrix, and the overall structure is referred to as a tensor. These structures are at the core of a neural network. The important thing to understand about them is that we can do mathematical operations on these structures very quickly and efficiently. But when we have so many matrices and tensors inside our network, how can we understand what any particular number means?
+Below is an example of what might be found inside a very small neural network (Claude 3 Sonnet has many millions as times as many parameters). These structures are at the core of a neural network. The important thing to understand about them is that we can do mathematical operations on these structures very quickly and efficiently. But when we have millions of these structures inside the brain of our network, how can we understand what any particular number means?
 
 ![alt text](example_tensor.png)
 
-What does the 0 in the orange part mean? How about the 14 at the end? 
+What does the 0 in the orange part mean? How about the 14 at the end?  The specific values of any one part of the model are the result of millions of small mathematical operations, and impossible for a human to just look at and understand what they mean. 
 
-A model like Claude 3 Sonnet has this type of data repeated thousands and thousands of times. The specific values of any one part of the model are the result of millions of small mathematical operations, and impossible for a human to just look at and understand what they mean. 
+This is what researchers, journalists, and engineers mean when they say the model is a "black box". The interior bits, the brains of the artificial intelligence, aren't interpretable to us. 
 
-This is what researchers, journalists, and engineers mean when they say the model is a "black box". The interior bits, the brains of the artificial intelligence, aren't interpretable to us. When a large language model makes a prediction for the next bit of text, it is the result of a series of mathematical operations using numbers that we can't explain their origin or significance. The numbers line up really well so that Claude is able to help us translate text and write emails, but we can't really say why there is a 7 or a 1 or a 3 in any one spot. 
+When a large language model makes a prediction for the next bit of text, it is the result of a series of mathematical operations using numbers that we can't explain their origin or significance. The numbers line up really well so that Claude is able to help us translate text and write emails, but we can't really say why there is a 7 or a 1 or a 3 in any one spot. It's not magic, more like an extremely chaotic mystery in a staggering volume impossible for any single person to wrap their head around.
+
+Understanding this black box is then a matter of deciphering this impossibly large puzzle. One approach (pursued by the authors) could be to break the parameters inside the model into pieces, where each piece is responsible for producing a specific kind of text, and understanding these pieces.
+
+This field of research is called "mechanistic interpretability". Not only are the researchers trying to understand the internal logic behind the output of an LLM, but they are trying to do this in a way that is easily repeatable and "scalable" (i.e. it works on systems of any size).
 
 Not only is understanding this black box important to see how the model is making its decisions, but it is essential to take fine grained, purposeful control of the system. If we want the system to behave in a less biased manner, it would be really helpful if we could find where "bias" is stored or represented in the system.
 
-The work of the Anthropic paper is to try and open up this black box. It is part of a field of research called "mechanistic interpretability". Not only are the researchers trying to understand the internal logic behind the output of an LLM, but they are trying to do this in a way that is easily repeatable and "scalable" (i.e. it works on systems of any size).
-
 In their paper, the Anthropic team builds upon their previous research in order to transform those very confusing numbers inside an LLM into a series of interpretable concepts that could one day be used to understand the models chain of thought, and to offer more specific control over its behavior.
 
-## Features and Directions
+## What are Features?
 
-One of the most important concepts from the paper is that the authors were able to identify "features". Let's spend a little time trying to be more precise on what these features are.
+One of the most important concepts from the paper is that the authors were able to identify what they call "features" of the language model. Let's spend a little time trying to be more precise on what these features are.
 
 When we say a person has very "distinguished features", we mean that they have certain qualities that are unique. We might identify these people by these unique qualities, like their striking eye color, or very large ears. When we say a movie "features" X or Y actor, we mean that they play a character in the movie, often a prominent or defining character.
 
 A feature in a machine learning model then is a unique and measurable property in the data that we identify as significant for learning to complete a particular task. In a classic example we are using a model to predict housing prices. We would input a series of features representing a house into our pipe (this time it is not a neural network, usually something more simple), and out would pop a predicted price. These features would be things like square footage, neighborhood, or the name of all current ghosts haunting the house. Before we started our project, we have identified these features as important for predicting the value of a house.
 
-In a large language model, all we get is text as input, and produce text as output. We never explicitly select which features the LLM should use. The neural network needs to learn to make connections between pieces of text in order to best achieve its given goal: predicting the next part of the phrase.
+In a large language model, all we get is text as input, and produce text as output. We never explicitly select which features the LLM should use. The moel needs to learn to make connections between pieces of text itself in the training process in order to best achieve its given goal: predicting the next part of the phrase. And remember, this process is happening on a massive set of numbers inside the model, making it very difficult for a human to look at and understand. Given this predicament, we can't really locate a specific part of the model that handles any one job, such as generating the word "pancackes", or refusing to generate text of a violent nature.
 
-So our task of understanding the features of the LLM is much more difficult here, because the model is learning the features itself.
+The valuable contribution of this paper is to try and map the parts of the brain the language model to specific and isolated features. Then we can attempt to use these features to understand why the language model responds in a particular way to a given prompt. 
 
-However as we saw before, we can't exatly locate any specific feature inside the parameters of the language model. So the crucial task of this paper is to try and map the parameters of the language model to specific and isolated features. Then we can imagine using these features to understand why the language model responds in a particular way to a given prompt. 
-
-Given that we are working with text, the features themselves will correspond to much more abstract concepts than house square footage.
+What makes matters even more difficult is that we are working with text, so the features themselves will correspond to much more abstract concepts than house square footage.
 
 For example if we input "I'm so sad..." it would be amazing if we could find a feature in the model representing sadness, then see that it lights up in some way for the next prediction. And then if we could force that part of the model to be lower than normal, maybe it would prevent the model from producing sad text. And maybe forcing it to be higher than normal would make the model behave like a moody teenager.
 
-When I say lights up what I am talking about is called an "activation". I think this term is really difficult to explain without going too deep into the internals of an LLM, but it is a very important part of the method the authors use to identify features.
+When I say lights up what I am talking about is called an "activation". This term is a very important part of the method the authors use to identify features. The activations are the result of the combination of the model's parameters with a specific piece of text.
 
-When the LLM reads input, as each piece of text is transformed into a number, it is seen by many different parts of the model. Reading and seeing, in the eyes of an LLM, is just performing different kinds of mathematical operations. At the end of this process, certain parts of the model will have a high value, and others low. The parts that have a high value, or high activation, are more responsible for the specific word that is predicted to come next. So when we are looking for features, we want to look for parts of the LLM that consistently have a high activation for the same kind of text.
+As we saw before, the process of training the model involves transforming that text into a number and then performing a series of mathematical operations on it using the numbers stored in the brain of the LLM (the parameters). When a specific piece of text is read by the model, it is combined with the parameters via the aforementioned operations. Some combinations will have a very high value, and others a very negative value, and others a value close to zero.
 
-Okay so this seems straightforward enough, why haven't we built a system that can look into the paramters of the model, finds the stuff that has a high value for specific text, and call it a day?
+The parts that have a high value, or high activation, are more responsible for the specific word that is predicted to come next. So when we are looking for features, we want to look for parts of the LLM that consistently have a high activation for the same kind of text.
 
-To understand this problem, we first have to think of features as directions. 
+So why haven't we built a system that can look into the paramters of the model, finds the stuff that has a high value for specific text, and call it a day?
+
+Answering this question is a core part of several previous publications from the Anthropic team. A very simple way to answer this question is to say that parts of the brain of the LLM have each learned many different features. We can't easily distinguish why a certain part has a high value for any specific piece of text, because very different pieces of text may cause similar activations. 
+
+These similar activations for different pieces of text is the meaning behind that gnarly word "polysemanticity" the authors use in the title of their paper. This next section gets a bit heavier into the mathematical concepts, so if that's not your vibe feel free to skip ahead to the next section.
+
+## Features as Directions
+
+The fundamental problem we have is that our activations do not clearly correspond to identifiable features we could use to interpret our model. Each activation might be caused my multiple overlapping features. The nature of this "overlap" is best explained if we think of our features as "directions".
 
 Maybe you are thinking of directions like: "Take a left at the stop sign and drive 5 blocks" or "Open the pod bay doors HAL!". 
 
 Instead we mean directions like an arrow pointing to an abitrary location on a grid. If that arrow points towards the 12 on a clock, we might call that direction North.
 
-If we think in two dimensions (like a graph with an x and a y axis) we can see that any point on our two dimensional grid forms a direction. We just have to draw a line from the origin and finish with a little triangular hat (the triangular hat is actually not necessary the neural network would need a very large hat rack to store all of them). 
+If we think in two dimensions (like a graph with an x and a y axis) we can see that any point on our two dimensional grid forms a direction. We just have to draw a line from the origin and finish with a little triangular hat (the triangular hat is actually not necessary the neural network would need a very large hat rack to store all of them).
 
-We see an example of two directional "vectors" below. 
+We see an example of two directions (often called vectors) below. 
 
 ![alt text](directions.png)
 
-Imagine then that we input our text into our neural network. It is transformed into a number, and then transformed by a bunch of math operations. We look through the parts of the neural network that have a high activation to find our features. These parts are actually each organized into sets of numbers. These sets of numbers are directions. We can think of them as directions in 2 dimensions if the set contains two numbers, but inside a neural network these lists are often much larger. We use these long lists to give the neural network a lot of "space" to learn in.
+Imagine then that we input our text into our neural network. It is transformed into a number, and then transformed by a bunch of math operations. This combination of our input text and our parameters produces our activations. 
 
-So when we are looking for features via their activations, we are looking for lists of numbers that we can describe as directions, each pointing to a specific location in the space the neural network works in. In the end, a final direction has the highest value over all the other ones, and is responsible for the final prediction.
+We then look at our activations. It would be nice if our activation was just a single number, but usually our activations are a long list of numbers, organized and sub organized into sub lists. We can think of the smallest groups of our activations as directions. If these smallest groups were two numbers, we would have a direction in a space of two dimensions. If they were three numbers, it would be a direction in a three dimensional space.
+
+Inside a neural network these lists are often much larger. We use these long lists to give the neural network a lot of "space" to learn in.
+
+So when we are looking for features via their activations, we are looking for groups of numbers that we can describe as directions, each pointing to a specific location in the space the neural network works in. We say that one direction has a higher value than another when it is further from the origin point of the grid. In the end, a certain final direction has the highest value over all the other ones, and is responsible for the final prediction.
 
 The issue we have is that there are many different ways this final direction could be produced by our neural network.
 
@@ -105,26 +123,28 @@ If you start to read Artificial Intelligence research, a few concepts reappaear 
 
 An autoencoder has many similarities to compression, where unnecessary information is removed on one end and then re-added on the other, in order to reduce the size of the information being transmitted. 
 
-An autoencoder is very similar. It has two parts, one which ususally forces the data (our numerical representation of text in this case) into a smaller set of lists, and a part on the other end that restores the data back to its original size. 
+An autoencoder is very similar. It has two parts, one which ususally forces the data (our numerical representation of text in this case) into a smaller size, and a part on the other end that restores the data back to its original size. 
 
-I could give write a whole different blog post about autoencoders, and I would like to keep it brief, but this concept of forcing data into a smaller dimension and letting the neural network learn what is important to keep track of, is a recurring concept central to many different artificial intelligence algorithms. We even have a fancy term, called "latent space" that you may have heard before, for this part of the model where the data is in a more compressed size.
+I could give write a whole different blog post about autoencoders, and I would like to keep it brief, but this concept of forcing data into a smaller size and letting the neural network learn what is important to keep track of, is a recurring concept central to many different artificial intelligence algorithms. We even have a fancy term, called "latent space" that you may have heard before, for this part of the model where the data is in a more compressed size.
 
 Here Anthropic do something different than your standard autoencoder. Rather than be trained to compress the representation of the data, this Sparse Autoencoder is trained to enlarge it. Lets ignore that first term (sparse) for a little bit, we will come back to it.
 
-In the previous section we were discussing a model where we have learned to represent text with two numbers, forming a direction. The authors at Anthropic have trained an auto encoder that takes those representations, learns to expand them to a much larger size, and then at the other end of the pipe they can recreate almost exactly the original activations. 
+In the previous section we were discussing a model where our activations are groups of numbers, let's say each group has two numbers. 
+
+The authors at Anthropic have trained an auto encoder that takes those groups of two numbers, and transforms them into many more numbers, and then at the other end of the pipe they can recreate almost exactly the original two numbers. 
 
 Here is an example to make things more concrete:
 - We take our phrase or sequence of text, and transform it into a numerical representation.
-- We pass that representation into our neural network, and throw the kitchen sink of simple mathematical operations at it. In the end we have a long list of numbers, organized in some way that we can think of them as forming directions. In two dimensions this would be two numbers, for an x and y coordinate.
-- Some of these lists of numbers are large, and others are small. We call these numbers our activations.
+- We pass that representation into our neural network, and throw the kitchen sink of simple mathematical operations at it. In the end we have combined our text and our parameters into a list of numbers, organized into directions of a specific length (i.e. two numbers).
+- Some of these lists of numbers are large, and others are small (i.e. close or far from the origin point). We call these numbers our activations.
 - The neural network uses these activations to then predict what the next piece of text is.
-- This is where we add our sparse autoencoder: the sparse auto encoder takes the activations, expands them to use many more numbers, and then is able to recreate the same activations at the other end, to ensure that we predict the same piece of text in the end.
+- This is where we add our sparse autoencoder: the sparse auto encoder takes the activations, expands them to lists of many more numbers, and then is able to recreate the same original activations at the other end, to ensure that we predict the same piece of text in the end.
 
 In the middle part of the sparse auto encoder, we have expanded the possible set of features that the model can express. This is baiscally like saying we have given the model a way bigger dictionary to use for storing information. This type of algorithm is actually called "dictionary learning" for this reason. If our original model was predicting text using lists of two numbers, if we let it use lists of 4 or 12 or 16 numbers, it would have many more options to represent different features.
 
 But why go through all this trouble? Didn't we just make our lives much more difficult by expanding the range of possible features, when we have been trying to nail down their specific meaning this whole time?
 
-This is where this term sparse comes in. When we use sparse in this context, what we mean is "rarely occuring". So when the Anthropic authors say that the model has learned "sparse features" they mean that the model has learned features which do not occur often, and thus do not mix together in a very hard to decipher pile. Basically we gave the model larger lists to use to represent features, but most of those numbers will be zeroes, and when its not a zero, we can easily connect that non zero value to a concept in our text. 
+This is where this term sparse comes in. When we use sparse in this context, what we mean is "rarely occuring". So when the Anthropic authors say that the model has learned "sparse features" they mean that the model has learned features which do not occur often, and thus do not mix together in a very hard to decipher pile. Basically we gave the model larger lists to use to represent features, but most of those numbers will be zeroes, and when its not a zero, we can easily connect that non zero value to a specific concept in our text and identify a feature. 
 
 In our example of predicting house prices, this is like a house having a rare amenity, like a pool or a jacuzzi or a trebuchet. It happens so rarely that when it does, we can usually identify that the price of the house will be higher, just because of this addition. 
 
@@ -144,7 +164,7 @@ In this image we see lines of text, some of them in different languages. Each li
 
 The important parts are the orange highlighted portions. These parts show where this feature (the one that seems to look for the Golden Gate Bridge) has a high activation. 
 
-When the text is going through the model, each feature "sees" each part of the text input, and has a corresponding activation. By feeding different text into the model and seeing which parts activate, the authors were able to identify that this feature is strongly connected to the Golden Gate Bridge.
+When the text is going through the model, each feature has an opportunity to combine with each part of the text input and produce a corresponding activation. By feeding different text into the model and seeing which parts activate, the authors were able to identify that this feature is strongly connected to the Golden Gate Bridge.
 
 This feature seems to work across languages, and even in pictures. Thus we can conclude that this part of the model "understands" the golden gate bridge, and is useful for identifying and understanding this concept.
 
