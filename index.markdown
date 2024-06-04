@@ -2,22 +2,17 @@
 layout: default
 ---
 
-I am a former Software Engineer and current Machine Learning Student. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. I am passionate about Deep Learning and Computer Vision, specifically self supervised learning and diffusion models.
+I am a former Software Engineer and current Machine Learning Engineer. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. I am passionate about Deep Learning and Artificial Intelligence, and love to work at the intersection of research and engineering.
 
 In 2019 I moved to Paris to learn French, work at Zenly, and eat way too many French pastries. 
 
-In 2022 I returned to school to pursue a Masters in Machine Learning at PSL Research University.
+In 2022 I returned to school to pursue the IASD Masters in Machine Learning at PSL Research University.
 
-Currently I am working at [Valeo.AI](https://valeoai.github.io/blog/) as a research intern working to understand the impact of the diffusion objective.
-
-I am open to talking about any projects in Machine Learning in research or industry. I like to get my hands dirty with complex software systems and build cool stuff.
-
-I hope to use this space to show off what I have built and talk about some ideas I have for the future!
+Currently I am working at [Valeo.AI](https://valeoai.github.io/blog/) as a research intern working on generative methods for 3D point cloud data in the context of autonomous driving.
+* * *
+## [Blog](/blog.html)
 * * *
 ## Projects
-### [ELECTRA Implementation](https://github.com/EllingtonKirby/Electra-Implementation)
-
-Implementation of ELECTRA-Small discriminator and replaced token detection training objective. Pre-trained on a language identification task and tested against a fine tuned model without pre-training to demonstrate effectiveness of ELECTRA objective even in data limited settings.
 
 ### [Graph Clustering to Identify Road Networks with Similar Traffic Behaviors](https://github.com/EllingtonKirby/Contiguity-Constrained-Clustering)
 
@@ -28,10 +23,6 @@ Here is an image of the Barcelona road network clustered by my aglorithm. The co
 ![Barcelona Clustering](/assets/img/base_clustering_results.png)
 
 I applied this method over a full day of data to evaluate how these clusters change with traffic demand. My method can be viewed on my github [here](https://github.com/EllingtonKirby/leidenalg/) 
-
-### Vehicle Trajectory Generation and Prediction Using RNNs
-
-In concert with data gathered by the CIRCLES Consortium at UC Berkely, I worked to develop encoder decoder and RNN based models to predict and generate vehicle trajectories.
 
 ### Fine Tuning BERT Models for Bio Medical Tasks
 
