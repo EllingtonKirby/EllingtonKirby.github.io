@@ -14,6 +14,12 @@ Why is "mapping the mind" of a large language model interesting? The image below
 
 This type of result can allow us a much deeper and clearer understanding of the artificial intelligence quickly weaving its way into our everyday lives. This is because these models are more or less "black boxes", meaning that we don't have a clear explanation of why the model gives a particular response to any input. We will see why solving this problem is  so difficult, and further explore what the Anthropic team were able to uncover. 
 
+This post is organized as follows:
+- A high level background on neural networks and what makes them a black box.
+- Next we introduce the concept of a feature of a language model and why they are useful for interpreting our language models.
+- Then come two more in depth sections looking into what makes finding features difficult, and how the authors addressed this problem. These sections are more in depth so skip them if you're not interested in details.
+- Finally we will look at more results like the image above, looking at examples of what the authors were able to accomplish.
+
 The paper from Anthropic published on May 21 2024, is officially titled "Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet". 
 
 Wow! There are some big words in there. But moving past the jargon, the title is basically saying: "we built a technique for understanding how LLMs reason, we improve that technique, and we use it to interpret how an LLM used by millions of people understand and generates text". I hope that by the end of this blog post you have a clearer understanding of what the Anthropic team achieved, and why it is significant, so let's get started.
@@ -72,15 +78,15 @@ When I say lights up what I am talking about is called an "activation". This ter
 
 As we saw before, the process of training the model involves transforming that text into a number and then performing a series of mathematical operations on it using the numbers stored in the brain of the LLM (the parameters). When a specific piece of text is read by the model, it is combined with the parameters via the aforementioned operations. Some combinations will have a very high value, and others a very negative value, and others a value close to zero.
 
-The parts that have a high value, or high activation, are more responsible for the specific word that is predicted to come next. So when we are looking for features, we want to look for parts of the LLM that consistently have a high activation for the same kind of text.
+The parts that have a high value, or high activation, are more responsible for the specific word that is predicted to come next. So when we are looking for features, we want to look for parts of the LLM that consistently have a high activation for the same kind of text. Running many pieces of the text through the model we would start to see patterns and could eventually find parts of the model that react to specific concepts like bias or puns or the word "fauteuil". 
 
 So why haven't we built a system that can look into the parameters of the model, find the stuff that has a high value for specific text, and call it a day?
 
 Answering this question is a core part of several previous publications from the Anthropic team. A very simple way to answer this question is to say that the LLM learned to re-use parts of its brain for the same features. We can't easily distinguish why a certain part has a high value for any specific piece of text, because very different pieces of text may cause similar activations. 
 
-That gnarly word "polysemanticity" used in the title of their paper refers to this situation: the activations of the model are relevant for many different features. 
+That gnarly word "polysemanticity" used in the title of their paper refers to this situation: the activations of the model are relevant for many different features. The current state of affairs is that we can't cleanly separate our features from one antoher, so we cannot find correlations between features and concepts, much less find features that are directly responsible for producing certain types of text.
 
-This next section gets a bit heavier into the mathematical concepts, so if that's not your vibe feel free to skip ahead to the next section.
+This next two section gets a bit deeper into the mathematical details of why polysemanticity is a problem, and how Anthropic resolved it, so if that's not your vibe feel free to skip ahead. But suffice to say that the authors have developed a solution to this problem, and they are indeed able to identify specific features inside the parameters of the LLM.
 
 ## Features as Directions
 
@@ -153,7 +159,7 @@ This process of using the auto encoder to learn these sparse features has been d
 
 ## Interpreting our Sparse Features 
 
-So now that we have our sparse auto encoders we can do some really cool stuff. When looking at how the model chose what text to predict next, we previously had a mixture of many different numbers that could all be responsible. But now we have just a few, and we can start to connect these features to specific behavior, like finding the feature for a historical figure or specific emotion.
+So now that we have our much more cleanly seperated and identifiable features we can do some really cool stuff. When looking at how the model chose what text to predict next, we previously had a mixture of many different numbers that could all be responsible. But now we have just a few, and we can start to connect these features to specific behavior, like finding the feature for a historical figure or specific emotion.
 
 The team at Anthropic built a lot of advanced user interfaces to help this process and connect the activations in the sparse autoencoder (the feature) to a specific concept in language. Let's look at an example: the feature which seems to represent the Golden Gate Bridge.
 
