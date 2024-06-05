@@ -34,13 +34,13 @@ Claude 3 Sonnet and all other LLMs are also neural networks. We can think of a n
 
 - It takes an input. This can be a picture, an audio file, or a piece of text. This goes "into the pipe".
 - It transforms the input into a number, then runs a massive series of simple mathematical operations (things like addition and multiplication) on that number using its the numbers stored in its weights or parameters.
-- Finally it finishes that series of mathematical operations, and spits out an ouput. In the case of an LLM, this is a word, specifically the word that the model predicts will come after the series of text it saw as input. 
+- Finally it finishes that series of mathematical operations, and spits out an output. In the case of an LLM, this is a word, specifically the word that the model predicts will come after the series of text it saw as input. 
 
 This repeatable loop is in essence what it means to train a model. In the training process the LLM repeatedly takes a phrase as input and then predicts what it believes the next word in the phrase to be. The numbers inside the model, again the parameters or weights, are then updated very slightly. This update ensures that the model makes the correct prediction more often, steadily learning how to craft intelligent-seeming responses.
 
 The important thing to point out here is that those numbers inside the model are impossible to interpret on their own. 
 
-Below is an example of what might be found inside a very small neural network (Claude 3 Sonnet has many millions of times as many parameters). We use these structures because they can be used to perform mathematical operations very quickly and efficiently. But when we have millions of these structures inside the brain of our network, how can we understand what any particular number means?
+Below is an example (courtest of Tensorflow) of what might be found inside a very small neural network (Claude 3 Sonnet has many millions of times as many parameters). We use these structures because they can be used to perform mathematical operations very quickly and efficiently. But when we have millions of these structures inside the brain of our network, how can we understand what any particular number means?
 
 ![alt text](example_tensor.png)
 
@@ -70,7 +70,7 @@ A feature in a machine learning model then is a unique and measurable property i
 
 In a large language model, all we get is text as input, and produce text as output. We never explicitly select which features the LLM should use. The model needs to learn to make connections between pieces of text itself in the training process in order to best achieve its given goal: predicting the next part of the phrase. And remember, this process is happening on a massive set of numbers inside the model, making it very difficult for a human to look at and understand. Given this predicament, we can't really locate a specific part of the model that handles any one job, such as generating the word "pancakes", or refusing to generate text of a violent nature.
 
-The valuable contribution of this paper is to try and map the parts of the brain the language model to specific and isolated features. Then we can attempt to use these features to understand why the language model responds in a particular way to a given prompt. 
+The valuable contribution of this paper is to try and map the parts of the brain of the language model to specific and isolated features. Then we can attempt to use these features to understand why the language model responds in a particular way to a given prompt. 
 
 For example if we input "I'm so sad..." it would be amazing if we could find a feature in the model representing sadness, then see that it lights up in some way for the next prediction. And then if we could force that part of the model to be lower than normal, maybe it would prevent the model from producing sad text. And maybe forcing it to be higher than normal would make the model behave like a moody teenager.
 
@@ -84,13 +84,13 @@ So why haven't we built a system that can look into the parameters of the model,
 
 Answering this question is a core part of several previous publications from the Anthropic team. A very simple way to answer this question is to say that the LLM learned to re-use parts of its brain for the same features. We can't easily distinguish why a certain part has a high value for any specific piece of text, because very different pieces of text may cause similar activations. 
 
-That gnarly word "polysemanticity" used in the title of their paper refers to this situation: the activations of the model are relevant for many different features. The current state of affairs is that we can't cleanly separate our features from one antoher, so we cannot find correlations between features and concepts, much less find features that are directly responsible for producing certain types of text.
+That gnarly word "polysemanticity" used in the title of their paper refers to this situation: the activations of the model are relevant for many different features. The current state of affairs is that we can't cleanly separate our features from one another, so we cannot find correlations between features and concepts, much less find features that are directly responsible for producing certain types of text.
 
 This next two section gets a bit deeper into the mathematical details of why polysemanticity is a problem, and how Anthropic resolved it, so if that's not your vibe feel free to skip ahead. But suffice to say that the authors have developed a solution to this problem, and they are indeed able to identify specific features inside the parameters of the LLM.
 
 ## Features as Directions
 
-The fundamental problem we have is that our activations do not clearly correspond to identifiable features we could use to interpret our model. Each activation might be caused my multiple overlapping features. The nature of this "overlap" is best explained if we think of our features as "directions".
+The fundamental problem we have is that our activations do not clearly correspond to identifiable features we could use to interpret our model. Each activation might be caused by multiple overlapping features. The nature of this "overlap" is best explained if we think of our features as "directions".
 
 Maybe you are thinking of directions like: "Take a left at the stop sign and drive 5 blocks" or "Open the pod bay doors HAL!". 
 
@@ -124,7 +124,7 @@ In a previous work the authors fully demonstrated that these properties (superpo
 
 ## Sparse Autoencoders and Scaling Problems
 
-If you start to read Artificial Intelligence research, a few concepts appaear all over the place. One of these concepts is the "Autoencoder". 
+If you start to read Artificial Intelligence research, a few concepts appear all over the place. One of these concepts is the "Autoencoder". 
 
 An autoencoder has many similarities to compression, where information is removed on one end and then re-added on the other, in order to reduce the size of the data being transmitted. 
 
@@ -159,7 +159,7 @@ This process of using the auto encoder to learn these sparse features has been d
 
 ## Interpreting our Sparse Features 
 
-So now that we have our much more cleanly seperated and identifiable features we can do some really cool stuff. When looking at how the model chose what text to predict next, we previously had a mixture of many different numbers that could all be responsible. But now we have just a few, and we can start to connect these features to specific behavior, like finding the feature for a historical figure or specific emotion.
+So now that we have our much more cleanly separated and identifiable features we can do some really cool stuff. When looking at how the model chose what text to predict next, we previously had a mixture of many different numbers that could all be responsible. But now we have just a few, and we can start to connect these features to specific behavior, like finding the feature for a historical figure or specific emotion.
 
 The team at Anthropic built a lot of advanced user interfaces to help this process and connect the activations in the sparse autoencoder (the feature) to a specific concept in language. Let's look at an example: the feature which seems to represent the Golden Gate Bridge.
 
@@ -244,3 +244,5 @@ I hope to post more educational content about artificial intelligence in the fut
 If you are interested in getting a deeper, mathematical understanding of these systems, here are some links to get you started:
 - 3Blue1Brown on YouTube has an excellently made series of videos explaining Neural Networks: [link](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
 - Andrej Karpathy is undoubtedly the GOAT (greatest of all time) public educator on artificial intelligence, and his channel is a great resource: [link](https://www.youtube.com/@AndrejKarpathy)
+
+All images courtesy of the Anthropic team. 
