@@ -8,7 +8,7 @@ In 2019 I moved to Paris to learn French, work at Zenly, and eat way too many Fr
 
 In 2022 I returned to school to pursue the IASD Masters in Machine Learning at PSL Research University.
 
-Currently I am working at [Valeo.AI](https://valeoai.github.io/blog/) as a research intern working on generative methods for 3D point cloud data in the context of autonomous driving.
+Currently I am working at [Valeo.AI](https://valeoai.github.io/blog/) as a research engineer working on End to End training of autonomous planning models.
 * * *
 ## [Blog](/blog.html)
 * * *
