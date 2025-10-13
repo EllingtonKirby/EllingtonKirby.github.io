@@ -1,3 +1,15 @@
+### [All Moves as First MCTS Applied to Splendor](https://github.com/ivanbravi/RinascimentoFramework/pull/2)
+
+My wife and I have greatly enjoyed playing [Splendor](https://en.wikipedia.org/wiki/Splendor_(game)), a board game based on accumulating tokens and using them to purchase cards. After losing a dozen times, I wanted to see if it would be possible to develop an AI to play the game for me, to finally win once or twice.
+
+Luckily a researcher QMU in London built an extremely handy framework for playing and simulating the game. However the current Monte Carlo Tree Search implementation suffered from a limitation where it performed the best under very shallow and narrow searches, preferring to search just one turn into the future, and sampling only two actions during state expansion.
+
+I wanted to implement a variation of MCTS that would benefit from searching deeper and more broadly into the game tree. I implemented the RAVE algorithm using "All Moves as First" statistics (somtimes called Killer Moves) from [1](https://www.cs.utexas.edu/~pstone/Courses/394Rspring11/resources/mcrave.pdf) and [2](https://users.soe.ucsc.edu/~dph/mypubs/AMAFpaperWithRef.pdf).
+
+The resulting agent performed very well! It beat all other agents in 1v1 gams of Splendor using depth and breadth parameters of 5 turns and 5 moves respectively.
+
+![Rave Results](/assets/img/rave_results.png)
+
 ### [Graph Clustering to Identify Road Networks with Similar Traffic Behaviors](https://github.com/EllingtonKirby/Contiguity-Constrained-Clustering)
 
 As part of the GRETTIA Lab at Université Gustave Eiffel I worked to adapt the Leiden Algorithm to cluster road networks.
