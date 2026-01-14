@@ -11,11 +11,11 @@ Currently I am working at [Valeo.AI](https://valeoai.github.io/blog/) as a Resea
 * * *
 ## Updates
 
+- January '26: Two new pre-prints available: [Driving on Registers](https://arxiv.org/abs/2601.05083) and [Leveraging 3D Representation Alignment and RGB Pretrained Priors for LiDAR Scene Generation](https://arxiv.org/abs/2601.07692)
 - July '25: [LOGen: Toward LiDAR Object Generation by Point Diffusion](https://github.com/valeoai/LOGen?tab=readme-ov-file) was accepted to [BMVC 2025](https://bmvc2025.bmva.org/)
 - July '25: Public release of our driving data conversion tool, [ScenarioMax](https://github.com/valeoai/ScenarioMax)
 - July '25: Got married!
 - February '25: Joined [Valeo AI](https://valeoai.github.io/) as a Research Engineer
-- November '24: Joined Parrot as a Computer Vision Engineer
 - September '24: Completed my Masters in Machine Learning from the [IASD Program at PSL Research University](https://www.masteriasd.eu/en/)
 - April '24: Joined Valeo AI as a research intern
 
@@ -24,7 +24,7 @@ Currently I am working at [Valeo.AI](https://valeoai.github.io/blog/) as a Resea
 
 ### Valeo AI - Research Engineer
 
-At Valeo AI I am the sole research engineer, working on several approaches to end to end driving. This includes kick-starting our closed loop training pipelines, pushing the development of our open loop approaches, working with researchers to define the future research direction, and opening collaborations with other research teams around the world.
+At Valeo AI I am the sole research engineer, wearing many hats and pushing forward our research on autonomous driving. This includes kick-starting our closed loop training pipelines, pushing the development of our open loop approaches, working with researchers to define the future research direction, and opening collaborations with other research teams around the world.
 
 ### Zenly - Snap Inc
 
