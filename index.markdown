@@ -4,7 +4,7 @@ layout: default
 
 I am a former Software Engineer and current Research Engineer. I have worked at large and medium sized companies as an Android Developer such as FanDuel and Snap Inc, as well as small startups and agencies. I am passionate about Deep Learning and Artificial Intelligence, and love to work at the intersection of research and engineering.
 
-Currently I am working at [Valeo.AI](https://valeoai.github.io/blog/) as a Research Engineer working on various approaches to End to End driving, with a focus on leveraging simulation to build robust scoring and world models. In addition I work on generative methods for 3D point cloud data in the context of autonomous driving.
+Currently I am working at [Valeo.AI](https://valeoai.github.io/) as a Research Engineer working on various approaches to End to End driving, with a focus on leveraging simulation to build robust scoring and world models. In addition I work on generative methods for 3D point cloud data in the context of autonomous driving.
 
 * * *
 ## [Blog](/blog.html)
