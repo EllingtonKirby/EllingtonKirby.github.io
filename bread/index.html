@@ -58,6 +58,7 @@
   .controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 12px; }
   .group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .group > .lbl { font-size: 12px; color: var(--muted); margin-right: 2px; text-transform: uppercase; letter-spacing: .04em; }
+  .group label { font-size: 13px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; }
   button, select, input[type=search] {
     font: inherit; font-size: 13px; color: var(--ink);
     background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
@@ -116,6 +117,7 @@
   .detail dd { margin: 0; font-variant-numeric: tabular-nums; }
   .detail .note { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
   .detail .near { font-size: 13px; }
+  .detail .src { font-size: 12px; color: var(--ink-2); margin: 0 0 10px; }
   .detail .near a { cursor: pointer; }
   .bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--ink-2); vertical-align: middle; margin-left: 6px; opacity: .5; }
 
@@ -157,6 +159,12 @@
       <button data-color="leaven" aria-pressed="false">Leavening</button>
       <button data-color="family" aria-pressed="false">Base</button>
     </div>
+    <div class="group" id="axis-pickers">
+      <span class="lbl">Axes</span>
+      <label>Across <select data-axis="x" aria-label="Horizontal axis"></select></label>
+      <label>Up <select data-axis="y" aria-label="Vertical axis"></select></label>
+      <label>Depth <select data-axis="z" aria-label="Depth axis"></select></label>
+    </div>
     <div class="group">
       <input type="search" id="search" placeholder="Find a dish…" aria-label="Find a dish">
       <button id="labels" aria-pressed="false">Show all names</button>
@@ -170,9 +178,9 @@
       <div class="tooltip" id="tooltip"></div>
       <div class="views" id="views">
         <button data-view="iso">3D</button>
-        <button data-view="hf">Hydration × Fat</button>
-        <button data-view="hy">Hydration × Yeast</button>
-        <button data-view="fy">Fat × Yeast</button>
+        <button data-view="xy"></button>
+        <button data-view="xz"></button>
+        <button data-view="zy"></button>
       </div>
       <div class="hint">Drag to rotate · scroll to zoom · right-drag to pan</div>
     </div>
@@ -207,7 +215,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-const DATA = window.BREAD_DATA.map((d, i) => ({ ...d, id: i, family: baseFamily(d.base) }));
+const DATA = window.BREAD_DATA.map((d, i) => ({ ...d, sugar: d.sugar ?? 0, egg: d.egg ?? 0, id: i, family: baseFamily(d.base) }));
 
 function baseFamily(base) {
   if (base.startsWith("corn")) return "Corn";
@@ -218,16 +226,25 @@ function baseFamily(base) {
 }
 
 // ---- axes ------------------------------------------------------------------
-// The cube spans 0..10 on every axis. x = hydration, y (up) = fat, z = yeast.
-const AXES = {
-  hydration: { key: "hydration", label: "Hydration %", max: 140, ticks: [0, 20, 40, 60, 80, 100, 120, 140], fmt: v => v + "%" },
-  fat:       { key: "fat",       label: "Fat %",       max: 90,  ticks: [0, 15, 30, 45, 60, 75, 90],          fmt: v => v + "%" },
-  yeast:     { key: "yeast",     label: "Yeast %",     max: 2.5, ticks: [0, 0.5, 1, 1.5, 2, 2.5],             fmt: v => v + "%" },
+// Five measures; any three go on the cube's axes. The cube spans 0..S on every axis:
+// x runs across, y is up, z runs towards the viewer.
+const MEASURES = {
+  hydration: { label: "Hydration" },
+  fat:       { label: "Fat" },
+  yeast:     { label: "Yeast" },
+  sugar:     { label: "Sugar" },
+  egg:       { label: "Egg" },
 };
+// Each scale runs from 0 to a round number just above the largest value in the data.
+for (const [k, m] of Object.entries(MEASURES)) {
+  const max = Math.max(...DATA.map(d => d[k]));
+  const step = [0.25, 0.5, 1, 2, 5, 10, 15, 20, 25, 50].find(st => max / st <= 7);
+  m.max = Math.ceil(max / step) * step || 1;
+  m.ticks = Array.from({ length: Math.round(m.max / step) + 1 }, (_, i) => +(i * step).toFixed(2));
+}
+const axes = { x: "hydration", y: "fat", z: "yeast" };
 const S = 10;
-const sx = v => v / AXES.hydration.max * S;
-const sy = v => v / AXES.fat.max * S;
-const sz = v => v / AXES.yeast.max * S;
+const scale = (axis, v) => v / MEASURES[axes[axis]].max * S;
 
 // ---- colour encodings -------------------------------------------------------
 // Categories are assigned palette slots in a fixed order; they never re-cycle.
@@ -255,6 +272,7 @@ let colorBy = "region";
 const hidden = { region: new Set(), leaven: new Set(), family: new Set() };
 let selected = null, hovered = null, showAll = false, query = "";
 
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const catOf = d => d[colorBy];
 const catName = (enc, c) => (ENCODINGS[enc].names || {})[c] || c;
@@ -292,9 +310,9 @@ function buildChrome() {
   const axis = new THREE.LineBasicMaterial({ color: css("--axis") });
   const seg = (pts, mat) => chrome.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(...p))), mat));
   const g = [];
-  for (const t of AXES.hydration.ticks) { const x = sx(t); g.push([x, 0, 0], [x, 0, S], [x, 0, 0], [x, S, 0]); }
-  for (const t of AXES.fat.ticks)       { const y = sy(t); g.push([0, y, 0], [S, y, 0], [0, y, 0], [0, y, S]); }
-  for (const t of AXES.yeast.ticks)     { const z = sz(t); g.push([0, 0, z], [S, 0, z], [0, 0, z], [0, S, z]); }
+  for (const t of MEASURES[axes.x].ticks) { const x = scale("x", t); g.push([x, 0, 0], [x, 0, S], [x, 0, 0], [x, S, 0]); }
+  for (const t of MEASURES[axes.y].ticks) { const y = scale("y", t); g.push([0, y, 0], [S, y, 0], [0, y, 0], [0, y, S]); }
+  for (const t of MEASURES[axes.z].ticks) { const z = scale("z", t); g.push([0, 0, z], [S, 0, z], [0, 0, z], [0, S, z]); }
   seg(g, grid);
   seg([[0, 0, 0], [S, 0, 0], [0, 0, 0], [0, S, 0], [0, 0, 0], [0, 0, S], [S, 0, 0], [S, 0, S], [0, 0, S], [S, 0, S]], axis);
 }
@@ -317,17 +335,39 @@ const stemGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0
 for (const d of DATA) {
   const mat = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.05, transparent: true });
   const m = new THREE.Mesh(GEOMS[d.cook], mat);
-  m.position.set(sx(d.hydration) + jitter(d.id, 1), sy(d.fat) + jitter(d.id, 2) * 0.5, sz(d.yeast) + jitter(d.id, 3));
-  m.position.y = Math.max(m.position.y, 0.05);
-  m.position.z = Math.max(m.position.z, 0.05);
   m.userData.d = d;
+  m.userData.target = new THREE.Vector3();
   // Stem from the point down to the floor helps read depth.
   const stem = new THREE.Line(stemGeo, new THREE.LineBasicMaterial({ transparent: true }));
-  stem.position.set(m.position.x, 0, m.position.z);
-  stem.scale.y = m.position.y;
   m.userData.stem = stem;
   scene.add(m, stem);
   meshes.push(m);
+}
+
+function placeTargets(instant) {
+  for (const m of meshes) {
+    const d = m.userData.d;
+    m.userData.target.set(
+      Math.max(scale("x", d[axes.x]) + jitter(d.id, 1), 0.05),
+      Math.max(scale("y", d[axes.y]) + jitter(d.id, 2) * 0.5, 0.05),
+      Math.max(scale("z", d[axes.z]) + jitter(d.id, 3), 0.05));
+    if (instant) m.position.copy(m.userData.target);
+  }
+  moving = true;
+}
+// Glide points to new positions after an axis change.
+let moving = false;
+function stepPoints() {
+  if (!moving) return;
+  moving = false;
+  for (const m of meshes) {
+    m.position.lerp(m.userData.target, 0.12);
+    if (m.position.distanceToSquared(m.userData.target) > 1e-5) moving = true;
+    else m.position.copy(m.userData.target);
+    const stem = m.userData.stem;
+    stem.position.set(m.position.x, 0, m.position.z);
+    stem.scale.y = m.position.y;
+  }
 }
 
 function restyle() {
@@ -358,12 +398,19 @@ function addOverlay(cls, text, pos, extra) {
   return item;
 }
 const AX = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) };
-for (const t of AXES.hydration.ticks) addOverlay("tick", AXES.hydration.fmt(t), [sx(t), -0.35, S + 0.35], { axis: AX.x });
-for (const t of AXES.fat.ticks.slice(1)) addOverlay("tick", AXES.fat.fmt(t), [-0.5, sy(t), S + 0.2], { axis: AX.y });
-for (const t of AXES.yeast.ticks.slice(1)) addOverlay("tick", AXES.yeast.fmt(t), [S + 0.55, -0.35, sz(t)], { axis: AX.z });
-addOverlay("axis-title", "Hydration", [S / 2, -1.1, S + 1.2], { axis: AX.x });
-addOverlay("axis-title", "Fat", [-1.2, S + 0.6, S + 0.2], { axis: AX.y });
-addOverlay("axis-title", "Yeast", [S + 1.6, -1.0, S / 2], { axis: AX.z });
+let axisItems = [];
+function buildTicks() {
+  for (const it of axisItems) { it.el.remove(); overlayItems.splice(overlayItems.indexOf(it), 1); }
+  const M = k => MEASURES[axes[k]];
+  axisItems = [
+    ...M("x").ticks.map(t => addOverlay("tick", t + "%", [scale("x", t), -0.35, S + 0.35], { axis: AX.x })),
+    ...M("y").ticks.slice(1).map(t => addOverlay("tick", t + "%", [-0.5, scale("y", t), S + 0.2], { axis: AX.y })),
+    ...M("z").ticks.slice(1).map(t => addOverlay("tick", t + "%", [S + 0.55, -0.35, scale("z", t)], { axis: AX.z })),
+    addOverlay("axis-title", M("x").label, [S / 2, -1.1, S + 1.2], { axis: AX.x }),
+    addOverlay("axis-title", M("y").label, [-1.2, S + 0.6, S + 0.2], { axis: AX.y }),
+    addOverlay("axis-title", M("z").label, [S + 1.6, -1.0, S / 2], { axis: AX.z }),
+  ];
+}
 const labels = meshes.map(m => addOverlay("label", m.userData.d.name, [0, 0, 0], { mesh: m }));
 
 const v = new THREE.Vector3();
@@ -396,9 +443,9 @@ const CENTER = new THREE.Vector3(S / 2, S / 2 - 0.5, S / 2);
 // grid lines line up. Distance is scaled with the FOV to keep the cube the same size.
 const VIEWS = {
   iso: { dir: new THREE.Vector3(17, 10, 20), fov: 38 },
-  hf:  { dir: new THREE.Vector3(0, 0, 1), fov: 4 },      // look down the yeast axis
-  hy:  { dir: new THREE.Vector3(0, 1, 0.0001), fov: 4 }, // look down the fat axis
-  fy:  { dir: new THREE.Vector3(1, 0, 0), fov: 4 },      // look down the hydration axis
+  xy:  { dir: new THREE.Vector3(0, 0, 1), fov: 4 },      // look down the depth axis
+  xz:  { dir: new THREE.Vector3(0, 1, 0.0001), fov: 4 }, // look down the vertical axis
+  zy:  { dir: new THREE.Vector3(1, 0, 0), fov: 4 },      // look down the horizontal axis
 };
 const FIT = 27 * Math.tan(THREE.MathUtils.degToRad(38) / 2);
 // Narrow (portrait) viewports need the camera further back for the cube to fit across.
@@ -450,7 +497,7 @@ function pick(e) {
   return best;
 }
 
-const fmtVals = d => `<div class="vals"><span>Hydration</span><span>${d.hydration}%</span><span>Fat</span><span>${d.fat}%</span><span>Yeast</span><span>${d.yeast}%</span></div>`;
+const fmtVals = d => `<div class="vals">${Object.entries(MEASURES).map(([k, m]) => `<span>${m.label}</span><span>${d[k]}%</span>`).join("")}</div>`;
 renderer.domElement.addEventListener("pointermove", e => {
   if (e.buttons) { tooltip.style.display = "none"; return; }
   const d = pick(e);
@@ -475,7 +522,7 @@ renderer.domElement.addEventListener("pointerup", e => {
 // ---- detail panel -----------------------------------------------------------------
 const detail = document.getElementById("detail");
 function neighbours(d, n) {
-  const dist = o => Math.hypot(sx(o.hydration - d.hydration), sy(o.fat - d.fat), sz(o.yeast - d.yeast));
+  const dist = o => Math.hypot(...["x", "y", "z"].map(a => scale(a, o[axes[a]] - d[axes[a]])));
   return DATA.filter(o => o !== d).sort((a, b) => dist(a) - dist(b)).slice(0, n);
 }
 const bar = (v, max) => `<span class="bar" style="width:${Math.max(2, v / max * 90)}px"></span>`;
@@ -489,15 +536,14 @@ function select(d) {
     <h4>${d.name}</h4>
     <div class="origin">${d.origin}</div>
     <dl>
-      <dt>Hydration</dt><dd>${d.hydration}%${bar(d.hydration, AXES.hydration.max)}</dd>
-      <dt>Fat</dt><dd>${d.fat}%${bar(d.fat, AXES.fat.max)}</dd>
-      <dt>Yeast</dt><dd>${d.yeast}%${bar(d.yeast, AXES.yeast.max)}</dd>
+      ${Object.entries(MEASURES).map(([k, m]) => `<dt>${m.label}</dt><dd>${d[k]}%${bar(d[k], m.max)}</dd>`).join("")}
       <dt>Leavening</dt><dd>${catName("leaven", d.leaven)}</dd>
       <dt>Cooked</dt><dd>${d.cook}</dd>
       <dt>Base</dt><dd>${d.base}</dd>
       <dt>Filling</dt><dd style="white-space:normal">${d.filling}</dd>
     </dl>
     <p class="note">${d.note}</p>
+    ${d.source ? `<p class="src">Dough from <a href="${d.source.url}" target="_blank" rel="noopener">${esc(d.source.title)}</a>${d.source.author ? ` (${esc(d.source.author)})` : ""}: ${esc(d.ingredients || "")}${d.calc_note ? `. <i>${esc(d.calc_note)}</i>` : ""}</p>` : `<p class="src">No published recipe found; values are an estimate.</p>`}
     <div class="near"><span style="color:var(--ink-2)">Closest wrappers:</span> ${near.map(o => `<a data-id="${o.id}">${o.name}</a> (${o.origin.split(" (")[0]})`).join(", ")}</div>`;
 }
 detail.addEventListener("click", e => { if (e.target.dataset.id) select(DATA[+e.target.dataset.id]); });
@@ -543,13 +589,39 @@ document.getElementById("labels").addEventListener("click", e => {
 document.getElementById("reset").addEventListener("click", () => {
   Object.values(hidden).forEach(s => s.clear());
   query = ""; document.getElementById("search").value = "";
-  select(null); goTo("iso"); refresh();
+  Object.assign(axes, { x: "hydration", y: "fat", z: "yeast" });
+  select(null); applyAxes(); goTo("iso"); refresh();
+});
+
+// ---- axis pickers -----------------------------------------------------------------
+const pickers = [...document.querySelectorAll("[data-axis]")];
+function applyAxes(instant) {
+  for (const sel of pickers) {
+    sel.innerHTML = Object.entries(MEASURES).map(([k, m]) => `<option value="${k}"${axes[sel.dataset.axis] === k ? " selected" : ""}>${m.label}</option>`).join("");
+  }
+  const L = a => MEASURES[axes[a]].label;
+  document.querySelector('[data-view="xy"]').textContent = `${L("x")} × ${L("y")}`;
+  document.querySelector('[data-view="xz"]').textContent = `${L("x")} × ${L("z")}`;
+  document.querySelector('[data-view="zy"]').textContent = `${L("z")} × ${L("y")}`;
+  buildChrome();
+  buildTicks();
+  placeTargets(instant);
+  if (selected) select(selected);
+}
+for (const sel of pickers) sel.addEventListener("change", () => {
+  const a = sel.dataset.axis, k = sel.value;
+  // Picking a measure that's already on another axis swaps the two.
+  const other = Object.keys(axes).find(b => b !== a && axes[b] === k);
+  if (other) axes[other] = axes[a];
+  axes[a] = k;
+  applyAxes();
 });
 
 // ---- table ------------------------------------------------------------------------
 const COLS = [
   ["name", "Dish"], ["origin", "Origin"], ["region", "Region"], ["cook", "Cooked"], ["leaven", "Leavening"],
-  ["hydration", "Hydration %", true], ["fat", "Fat %", true], ["yeast", "Yeast %", true], ["base", "Base"], ["filling", "Filling"],
+  ["hydration", "Hydration %", true], ["fat", "Fat %", true], ["yeast", "Yeast %", true], ["sugar", "Sugar %", true], ["egg", "Egg %", true],
+  ["base", "Base"], ["filling", "Filling"], ["source", "Source"],
 ];
 let sortKey = "hydration", sortDir = 1;
 const table = document.getElementById("table");
@@ -560,20 +632,23 @@ table.tHead.addEventListener("click", e => {
   sortKey = k; renderTable();
 });
 table.tBodies[0].addEventListener("click", e => {
-  const tr = e.target.closest("tr"); if (!tr) return;
+  const tr = e.target.closest("tr"); if (!tr || e.target.closest("a")) return;
   const d = DATA[+tr.dataset.id];
   select(selected === d ? null : d);
   if (selected) viewport.scrollIntoView({ behavior: "smooth", block: "center" });
 });
+const sortVal = d => sortKey === "source" ? (d.source ? d.source.author || d.source.title : "") : d[sortKey];
 function renderTable() {
   for (const th of table.tHead.rows[0].cells) th.setAttribute("aria-sort", th.dataset.k === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none");
   const rows = [...DATA].sort((a, b) => {
-    const x = a[sortKey], y = b[sortKey];
+    const x = sortVal(a), y = sortVal(b);
     return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * sortDir || a.name.localeCompare(b.name);
   });
   table.tBodies[0].innerHTML = rows.map(d => `<tr data-id="${d.id}" class="${d === selected ? "sel" : ""} ${isVisible(d) && matches(d) ? "" : "dim"}">` +
     COLS.map(([k, , num]) => {
-      let val = k === "leaven" ? catName("leaven", d[k]) : d[k];
+      let val = k === "leaven" ? catName("leaven", d[k])
+        : k === "source" ? (d.source ? `<a href="${d.source.url}" target="_blank" rel="noopener">${esc(d.source.author || d.source.title)}</a>` : "—")
+        : d[k];
       if (k === colorBy || (k === "base" && colorBy === "family")) val = `<span class="dot" style="background:var(${slotVar(colorBy, d[colorBy])})"></span>${val}`;
       return `<td class="${num ? "num" : ""}">${val}</td>`;
     }).join("") + "</tr>").join("");
@@ -596,6 +671,7 @@ new ResizeObserver(resize).observe(viewport);
 
 function frame() {
   step(0.04);
+  stepPoints();
   controls.update();
   renderer.render(scene, camera);
   placeOverlay(viewport.clientWidth, viewport.clientHeight);
@@ -605,7 +681,8 @@ function frame() {
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { buildChrome(); restyle(); });
 new MutationObserver(() => { buildChrome(); restyle(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-buildChrome();
+applyAxes(true);
+stepPoints();
 resize();
 goTo("iso", true);
 refresh();
