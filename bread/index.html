@@ -117,6 +117,7 @@
   .detail dd { margin: 0; font-variant-numeric: tabular-nums; }
   .detail .note { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
   .detail .near { font-size: 13px; }
+  a.dish { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
   .detail .src { font-size: 12px; color: var(--ink-2); margin: 0 0 10px; }
   .detail .near a { cursor: pointer; }
   .bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--ink-2); vertical-align: middle; margin-left: 6px; opacity: .5; }
@@ -157,6 +158,8 @@
       <span class="lbl">Colour by</span>
       <button data-color="region" aria-pressed="true">Region</button>
       <button data-color="leaven" aria-pressed="false">Leavening</button>
+      <button data-color="cluster" aria-pressed="false">Cluster</button>
+      <label id="k-pick" hidden>k <select id="k" aria-label="Number of clusters"><option>3</option><option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option></select></label>
     </div>
     <div class="group" id="axis-pickers">
       <span class="lbl">Axes</span>
@@ -199,6 +202,15 @@
   <p><b>Yeast</b> is given as instant-yeast equivalent. Chemically leavened doughs (baking powder or soda), steam-lifted laminated pastries and unleavened doughs all sit at zero; colour by <i>Leavening</i> to tell them apart.</p>
   <p><b>Sugar</b> counts every sugar in the dough, including honey and syrup: near zero for most savoury wrappers, high for sweet buns and Cantonese mooncake skin. <b>Egg</b> is the weight of whole egg (or its yolk and white equivalent) per 100 g of flour. It is what sets fresh pasta and enriched breads apart from flour-and-water dumplings.</p>
   <p>A little jitter is added in 3D so dishes with identical recipes don't hide each other. The table shows the exact values.</p>
+
+  <h2>What the clusters show</h2>
+  <p>Colour by <i>Cluster</i> to group the dishes with k-means. It uses all five measures, each scaled to its maximum so none dominates, and ignores region, cooking method and filling. The groups below are for six clusters; hierarchical clustering finds nearly the same ones.</p>
+  <p><b>Pies and quiche do end up together.</b> The short-and-flaky cluster holds <a class="dish" data-dish="Quiche Lorraine">Quiche Lorraine</a>, <a class="dish" data-dish="Cornish pasty">Cornish pasty</a>, <a class="dish" data-dish="Pork pie">Pork pie</a>, <a class="dish" data-dish="Tourtière">Tourtière</a>, <a class="dish" data-dish="Australian meat pie">Australian meat pie</a> and <a class="dish" data-dish="Apple pie">Apple pie</a>. It also holds pastries that travelled with empire and trade: <a class="dish" data-dish="Jamaican patty">Jamaican patty</a>, <a class="dish" data-dish="Nigerian meat pie">Nigerian meat pie</a> and the <a class="dish" data-dish="Filipino empanada">Filipino empanada</a>. Less expected are China's water-oil flaky pastry (<a class="dish" data-dish="Suzhou mooncake">Suzhou mooncake</a>, <a class="dish" data-dish="Wife cake">Wife cake</a>), the Malaysian <a class="dish" data-dish="Curry puff">Curry puff</a>, and, at most values of <i>k</i>, India's <a class="dish" data-dish="Samosa">Samosa</a> and <a class="dish" data-dish="Gujiya">Gujiya</a>. Rubbing ghee into the flour for a samosa (<i>moyan</i>) does the same job as rubbing butter in for shortcrust.</p>
+  <p><b>Steamed and baked buns are the same dough.</b> Chinese and Japanese buns (<a class="dish" data-dish="Char siu bao">Char siu bao</a>, <a class="dish" data-dish="Nikuman">Nikuman</a>, <a class="dish" data-dish="Siopao">Siopao</a>) cluster with the <a class="dish" data-dish="Hamburger">Hamburger</a> bun, <a class="dish" data-dish="Kolache (klobasnek)">Kolache (klobasnek)</a>, <a class="dish" data-dish="Bierock / Runza">Bierock / Runza</a> and <a class="dish" data-dish="Piroshki">Piroshki</a>. Steaming versus baking changes the crust, not the recipe. <a class="dish" data-dish="Bánh mì">Bánh mì</a>, the Mexican <a class="dish" data-dish="Torta">Torta</a> and the <a class="dish" data-dish="Cubano">Cubano</a> sit here too: three sandwich rolls each often traced back to French bread.</p>
+  <p><b>Dumplings look alike across Eurasia.</b> The largest group is the lean doughs, little more than flour and water. <a class="dish" data-dish="Jiaozi">Jiaozi</a>, <a class="dish" data-dish="Pelmeni">Pelmeni</a>, <a class="dish" data-dish="Khinkali">Khinkali</a>, <a class="dish" data-dish="Mantı">Mantı</a>, <a class="dish" data-dish="Momo">Momo</a>, <a class="dish" data-dish="Buuz">Buuz</a> and <a class="dish" data-dish="Pierogi">Pierogi</a> are close to interchangeable on these numbers, which fits the story of the dumpling spreading along the Silk Road. The baguette in a <a class="dish" data-dish="Jambon-beurre">Jambon-beurre</a> and Naples' <a class="dish" data-dish="Calzone">Calzone</a> land here too. Long, slow fermentation needs so little yeast that compositionally they are lean doughs that happen to rise.</p>
+  <p><b>Egg makes pasta.</b> <a class="dish" data-dish="Ravioli">Ravioli</a> and <a class="dish" data-dish="Tortellini">Tortellini</a> group with Turkey's <a class="dish" data-dish="Su böreği">Su böreği</a>, whose sheets are an egg dough boiled like pasta before layering.</p>
+  <p><b>Two small outlier groups.</b> <a class="dish" data-dish="Cantonese mooncake">Cantonese mooncake</a>, <a class="dish" data-dish="Bánh bao">Bánh bao</a> and the Bolivian <a class="dish" data-dish="Salteña">Salteña</a> stand apart on sugar. <a class="dish" data-dish="Pastilla">Pastilla</a>, <a class="dish" data-dish="Brik">Brik</a> and <a class="dish" data-dish="Coxinha">Coxinha</a> stand apart on liquid: the first two use sheets made from a dabbed batter, and coxinha dough is flour cooked in stock.</p>
+  <p><a class="dish" data-dish="Pain au chocolat">Pain au chocolat</a> is laminated like puff pastry and yeasted like a bun, so it switches clusters as <i>k</i> changes; samosa and gujiya sit on the edge between pastry and lean dough the same way. With one recipe per dish, read the boundaries loosely: the dishes near a cluster's edge could fall either way with a different cook's recipe.</p>
 
   <h2>Sources</h2>
   <p>Each dish's numbers are computed from one published recipe for its dough, linked in the detail panel and the table. That recipe stands in for the dish, but cooks disagree: a Shanghainese grandmother's xiaolongbao and a restaurant's can differ by 20 points of hydration. Where a recipe gave cups and spoons, they were converted to grams with standard densities. Four dishes (siopao, Filipino empanada, mkate wa mayai, Jamaican patty) have no source with quantities yet, and their values are estimates.</p>
@@ -259,8 +271,62 @@ const ENCODINGS = {
 };
 const COOKS = ["baked", "fried", "steamed", "boiled", "griddled"];
 
+// ---- clustering -------------------------------------------------------------------
+// k-means on all five measures, each divided by its maximum so they weigh equally.
+// Seeded k-means++ with many restarts, so the result is the same on every load.
+const FEATURES = Object.keys(MEASURES);
+const VEC = DATA.map(d => FEATURES.map(k => d[k] / MEASURES[k].max));
+function kmeans(X, k, restarts = 60) {
+  let seed = 7;
+  const rand = () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const d2 = (a, b) => a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0);
+  let best = null;
+  for (let r = 0; r < restarts; r++) {
+    const C = [X[Math.floor(rand() * X.length)]];
+    while (C.length < k) {
+      const w = X.map(x => Math.min(...C.map(c => d2(x, c))));
+      let t = rand() * w.reduce((a, b) => a + b, 0), i = 0;
+      while ((t -= w[i]) > 0 && i < X.length - 1) i++;
+      C.push(X[i]);
+    }
+    let L = [], changed = true;
+    for (let it = 0; it < 100 && changed; it++) {
+      const L2 = X.map(x => C.reduce((bi, c, j) => d2(x, c) < d2(x, C[bi]) ? j : bi, 0));
+      changed = L2.some((l, i) => l !== L[i]); L = L2;
+      for (let j = 0; j < k; j++) {
+        const m = X.filter((_, i) => L[i] === j);
+        if (m.length) C[j] = m[0].map((_, f) => m.reduce((s, x) => s + x[f], 0) / m.length);
+      }
+    }
+    const inertia = X.reduce((s, x, i) => s + d2(x, C[L[i]]), 0);
+    if (!best || inertia < best.inertia - 1e-9) best = { L, C, inertia };
+  }
+  return best;
+}
+// Name a cluster after what stands out in its average recipe.
+function clusterName(c) {
+  const v = Object.fromEntries(FEATURES.map((k, i) => [k, c[i] * MEASURES[k].max]));
+  if (v.hydration > 110) return "Batter-thin and very wet";
+  if (v.egg > 25) return "Egg doughs";
+  if (v.sugar > 20) return "Sweet doughs";
+  if (v.fat > 30) return "Short and flaky pastry";
+  if (v.yeast > 0.7) return "Yeasted breads and buns";
+  return "Lean doughs";
+}
+function runClusters(k) {
+  const { L, C } = kmeans(VEC, k);
+  const base = C.map(clusterName);
+  // Two clusters can get the same name at higher k; number the repeats.
+  const names = base.map((n, j) => base.filter(m => m === n).length > 1 ? `${n} ${base.slice(0, j + 1).filter(m => m === n).length}` : n);
+  DATA.forEach((d, i) => { d.cluster = names[L[i]]; });
+  const cats = [...new Set(names)].sort((a, b) => DATA.filter(d => d.cluster === b).length - DATA.filter(d => d.cluster === a).length);
+  ENCODINGS.cluster = { title: "Cluster", cats, slots: cats.map((_, i) => i + 1) };
+  hidden.cluster = new Set();
+}
+
 let colorBy = "region";
 const hidden = { region: new Set(), leaven: new Set() };
+runClusters(6);
 let selected = null, hovered = null, showAll = false, query = "";
 
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -513,7 +579,7 @@ renderer.domElement.addEventListener("pointerup", e => {
 // ---- detail panel -----------------------------------------------------------------
 const detail = document.getElementById("detail");
 function neighbours(d, n) {
-  const dist = o => Math.hypot(...["x", "y", "z"].map(a => scale(a, o[axes[a]] - d[axes[a]])));
+  const dist = o => Math.hypot(...VEC[o.id].map((v, i) => v - VEC[d.id][i]));
   return DATA.filter(o => o !== d).sort((a, b) => dist(a) - dist(b)).slice(0, n);
 }
 const bar = (v, max) => `<span class="bar" style="width:${Math.max(2, v / max * 90)}px"></span>`;
@@ -528,6 +594,7 @@ function select(d) {
     <div class="origin">${d.origin}</div>
     <dl>
       ${Object.entries(MEASURES).map(([k, m]) => `<dt>${m.label}</dt><dd>${d[k]}%${bar(d[k], m.max)}</dd>`).join("")}
+      <dt>Cluster</dt><dd>${d.cluster}</dd>
       <dt>Leavening</dt><dd>${catName("leaven", d.leaven)}</dd>
       <dt>Cooked</dt><dd>${d.cook}</dd>
       <dt>Base</dt><dd>${d.base}</dd>
@@ -536,9 +603,14 @@ function select(d) {
     <p class="note">${d.note}</p>
     ${d.confidence && d.confidence !== "estimate" ? `<p class="src">Confidence: ${d.confidence}</p>` : ""}
     ${d.source ? `<p class="src">Dough from <a href="${d.source.url}" target="_blank" rel="noopener">${esc(d.source.title)}</a>${d.source.author ? ` (${esc(d.source.author)})` : ""}: ${esc(d.ingredients || "")}${d.calc_note ? `. <i>${esc(d.calc_note)}</i>` : ""}</p>` : `<p class="src">No published recipe found; values are an estimate.</p>`}
-    <div class="near"><span style="color:var(--ink-2)">Closest wrappers:</span> ${near.map(o => `<a data-id="${o.id}">${o.name}</a> (${o.origin.split(" (")[0]})`).join(", ")}</div>`;
+    <div class="near"><span style="color:var(--ink-2)">Closest wrappers (all five measures):</span> ${near.map(o => `<a data-id="${o.id}">${o.name}</a> (${o.origin.split(" (")[0]})`).join(", ")}</div>`;
 }
 detail.addEventListener("click", e => { if (e.target.dataset.id) select(DATA[+e.target.dataset.id]); });
+document.addEventListener("click", e => {
+  const name = e.target.dataset && e.target.dataset.dish; if (!name) return;
+  select(DATA.find(d => d.name === name));
+  viewport.scrollIntoView({ behavior: "smooth", block: "center" });
+});
 
 // ---- legends ----------------------------------------------------------------------
 const SHAPE_ICONS = {
@@ -571,9 +643,15 @@ document.getElementById("legend").addEventListener("click", e => {
 });
 document.querySelectorAll("[data-color]").forEach(b => b.addEventListener("click", () => {
   colorBy = b.dataset.color;
+  document.getElementById("k-pick").hidden = colorBy !== "cluster";
   document.querySelectorAll("[data-color]").forEach(x => x.setAttribute("aria-pressed", x === b));
   refresh();
 }));
+document.getElementById("k").addEventListener("change", e => {
+  runClusters(+e.target.value);
+  refresh();
+  if (selected) select(selected);
+});
 document.getElementById("search").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); refresh(); });
 document.getElementById("labels").addEventListener("click", e => {
   showAll = !showAll; e.target.setAttribute("aria-pressed", showAll);
@@ -613,7 +691,7 @@ for (const sel of pickers) sel.addEventListener("change", () => {
 const COLS = [
   ["name", "Dish"], ["origin", "Origin"], ["region", "Region"], ["cook", "Cooked"], ["leaven", "Leavening"],
   ["hydration", "Hydration %", true], ["fat", "Fat %", true], ["yeast", "Yeast %", true], ["sugar", "Sugar %", true], ["egg", "Egg %", true],
-  ["base", "Base"], ["filling", "Filling"], ["source", "Source"],
+  ["cluster", "Cluster"], ["base", "Base"], ["filling", "Filling"], ["source", "Source"],
 ];
 let sortKey = "hydration", sortDir = 1;
 const table = document.getElementById("table");
