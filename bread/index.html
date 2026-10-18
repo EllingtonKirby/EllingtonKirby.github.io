@@ -149,7 +149,7 @@
   <header>
     <a class="back" href="/blog.html">← Blog</a>
     <h1>Dough around filling</h1>
-    <p class="lede">Nearly every cuisine wraps something in dough: dumplings, pies, buns, pastries, sandwiches. The fillings get the attention, but the wrapper is where the real variety is. Each point below is one dish, placed by the recipe for its outer layer: how wet the dough is, how much fat, yeast, sugar and egg it carries. Pick any three for the axes. Drag to rotate, scroll to zoom, click a point for details and the source recipe.</p>
+    <p class="lede">Nearly every cuisine wraps something in wheat dough: dumplings, pies, buns, pastries, sandwiches. The fillings get the attention, but the wrapper is where the real variety is. Each point below is one dish, placed by the recipe for its outer layer: how wet the dough is, how much fat, yeast, sugar and egg it carries. Pick any three for the axes. Drag to rotate, scroll to zoom, click a point for details and the source recipe.</p>
   </header>
 
   <div class="controls">
@@ -157,7 +157,6 @@
       <span class="lbl">Colour by</span>
       <button data-color="region" aria-pressed="true">Region</button>
       <button data-color="leaven" aria-pressed="false">Leavening</button>
-      <button data-color="family" aria-pressed="false">Base</button>
     </div>
     <div class="group" id="axis-pickers">
       <span class="lbl">Axes</span>
@@ -194,8 +193,8 @@
   </div>
 
   <h2>What the axes mean</h2>
-  <p>All five are baker's percentages: grams per 100 g of flour (or masa, rice flour, starch).</p>
-  <p><b>Hydration</b> is all the liquid in the dough: water, broth, milk, and the water carried by eggs and butter. Stiff samosa and pie doughs sit around 30–40%. Dumpling doughs mostly 45–65%, bread doughs 55–75%. Corn masa, scalded starch doughs and the batter used for warqa and brik sheets go well past 100%, which is why the hydration axis runs so long.</p>
+  <p>All five are baker's percentages: grams per 100 g of wheat flour, white or wholemeal. Wrappers made from corn, rice, tapioca or rye are left out here; they behave differently enough to deserve their own chart.</p>
+  <p><b>Hydration</b> is all the liquid in the dough: water, broth, milk, and the water carried by eggs and butter. Stiff samosa and pie doughs sit around 30–40%. Dumpling doughs mostly 45–65%, bread doughs 55–75%. Coxinha dough (flour cooked in stock) and the batter used for warqa and brik sheets go well past 100%.</p>
   <p><b>Fat</b> is the butter, lard, suet, oil or ghee worked into or laminated through the dough. Lean breads and dumplings sit near zero. Shortcrusts are around 40–65%, and the rough puff for a sausage roll passes 90%. Fat brushed between filo sheets after rolling is not counted.</p>
   <p><b>Yeast</b> is given as instant-yeast equivalent. Chemically leavened doughs (baking powder or soda), steam-lifted laminated pastries and unleavened doughs all sit at zero; colour by <i>Leavening</i> to tell them apart.</p>
   <p><b>Sugar</b> counts every sugar in the dough, including honey and syrup: near zero for most savoury wrappers, high for sweet buns and Cantonese mooncake skin. <b>Egg</b> is the weight of whole egg (or its yolk and white equivalent) per 100 g of flour. It is what sets fresh pasta and enriched breads apart from flour-and-water dumplings.</p>
@@ -220,15 +219,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-const DATA = window.BREAD_DATA.map((d, i) => ({ ...d, sugar: d.sugar ?? 0, egg: d.egg ?? 0, id: i, family: baseFamily(d.base) }));
-
-function baseFamily(base) {
-  if (base.startsWith("corn")) return "Corn";
-  if (base.startsWith("rye")) return "Rye";
-  if (base.startsWith("whole wheat")) return "Whole wheat";
-  if (base.startsWith("wheat starch") || base.startsWith("tapioca") || base.startsWith("rice")) return "Rice / starch";
-  return "Wheat";
-}
+const DATA = window.BREAD_DATA.map((d, i) => ({ ...d, sugar: d.sugar ?? 0, egg: d.egg ?? 0, id: i }));
 
 // ---- axes ------------------------------------------------------------------
 // Five measures; any three go on the cube's axes. The cube spans 0..S on every axis:
@@ -265,16 +256,11 @@ const ENCODINGS = {
     names: { none: "Unleavened", yeast: "Yeast", chemical: "Chemical (baking powder/soda)", steam: "Steam (laminated)" },
     slots: [1, 2, 3, 7],
   },
-  family: {
-    title: "Flour base",
-    cats: ["Wheat", "Whole wheat", "Rye", "Corn", "Rice / starch"],
-    slots: [1, 2, 3, 4, 7],
-  },
 };
 const COOKS = ["baked", "fried", "steamed", "boiled", "griddled"];
 
 let colorBy = "region";
-const hidden = { region: new Set(), leaven: new Set(), family: new Set() };
+const hidden = { region: new Set(), leaven: new Set() };
 let selected = null, hovered = null, showAll = false, query = "";
 
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -655,7 +641,7 @@ function renderTable() {
       let val = k === "leaven" ? catName("leaven", d[k])
         : k === "source" ? (d.source ? `<a href="${d.source.url}" target="_blank" rel="noopener">${esc(d.source.author || d.source.title)}</a>` : "—")
         : d[k];
-      if (k === colorBy || (k === "base" && colorBy === "family")) val = `<span class="dot" style="background:var(${slotVar(colorBy, d[colorBy])})"></span>${val}`;
+      if (k === colorBy) val = `<span class="dot" style="background:var(${slotVar(colorBy, d[colorBy])})"></span>${val}`;
       return `<td class="${num ? "num" : ""}">${val}</td>`;
     }).join("") + "</tr>").join("");
 }
