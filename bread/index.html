@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dough Around Filling</title>
-<meta name="description" content="An interactive 3D map of the world's filled doughs — dumplings, pies, buns, pastries and sandwiches — placed by the hydration, fat and yeast of their outer layer.">
+<meta name="description" content="An interactive 3D map of the world's filled doughs — dumplings, pies, buns, pastries and sandwiches — placed by the hydration, fat, yeast, sugar and egg of their outer layer.">
 <style>
   :root {
     color-scheme: light;
@@ -149,7 +149,7 @@
   <header>
     <a class="back" href="/blog.html">← Blog</a>
     <h1>Dough around filling</h1>
-    <p class="lede">Nearly every cuisine wraps something in dough: dumplings, pies, buns, pastries, sandwiches. The fillings get the attention, but the wrapper is where the real variety is. Each point below is one dish, placed by three numbers from its outer layer: how wet the dough is, how much fat it carries, and how much yeast it uses. Drag to rotate, scroll to zoom, click a point for details.</p>
+    <p class="lede">Nearly every cuisine wraps something in dough: dumplings, pies, buns, pastries, sandwiches. The fillings get the attention, but the wrapper is where the real variety is. Each point below is one dish, placed by the recipe for its outer layer: how wet the dough is, how much fat, yeast, sugar and egg it carries. Pick any three for the axes. Drag to rotate, scroll to zoom, click a point for details and the source recipe.</p>
   </header>
 
   <div class="controls">
@@ -194,11 +194,16 @@
   </div>
 
   <h2>What the axes mean</h2>
-  <p>All three are baker's percentages: grams per 100 g of flour (or masa, rice flour, starch).</p>
-  <p><b>Hydration</b> is all the liquid in the dough: water, broth, milk, and the water carried by eggs and butter. Stiff samosa and pie doughs sit near 30%. Dumpling and noodle doughs around 45–50%. Bread doughs 60–80%. Corn masa and scalded starch doughs go past 100%.</p>
-  <p><b>Fat</b> is the butter, lard, suet, oil or ghee worked into or laminated through the dough. Lean breads and dumplings sit near zero. Shortcrusts are around 50–65%, and puff pastry near 85%. Fat brushed between filo sheets after rolling is not counted.</p>
+  <p>All five are baker's percentages: grams per 100 g of flour (or masa, rice flour, starch).</p>
+  <p><b>Hydration</b> is all the liquid in the dough: water, broth, milk, and the water carried by eggs and butter. Stiff samosa and pie doughs sit around 30–40%. Dumpling doughs mostly 45–65%, bread doughs 55–75%. Corn masa, scalded starch doughs and the batter used for warqa and brik sheets go well past 100%, which is why the hydration axis runs so long.</p>
+  <p><b>Fat</b> is the butter, lard, suet, oil or ghee worked into or laminated through the dough. Lean breads and dumplings sit near zero. Shortcrusts are around 40–65%, and the rough puff for a sausage roll passes 90%. Fat brushed between filo sheets after rolling is not counted.</p>
   <p><b>Yeast</b> is given as instant-yeast equivalent. Chemically leavened doughs (baking powder or soda), steam-lifted laminated pastries and unleavened doughs all sit at zero; colour by <i>Leavening</i> to tell them apart.</p>
-  <p>The numbers come from typical traditional and home recipes, rounded, so read each point as "roughly here". A little jitter is added in 3D so dishes with identical recipes don't hide each other. The table shows the exact values.</p>
+  <p><b>Sugar</b> counts every sugar in the dough, including honey and syrup: near zero for most savoury wrappers, high for sweet buns and Cantonese mooncake skin. <b>Egg</b> is the weight of whole egg (or its yolk and white equivalent) per 100 g of flour. It is what sets fresh pasta and enriched breads apart from flour-and-water dumplings.</p>
+  <p>A little jitter is added in 3D so dishes with identical recipes don't hide each other. The table shows the exact values.</p>
+
+  <h2>Sources</h2>
+  <p>Each dish's numbers are computed from one published recipe for its dough, linked in the detail panel and the table. That recipe stands in for the dish, but cooks disagree: a Shanghainese grandmother's xiaolongbao and a restaurant's can differ by 20 points of hydration. Where a recipe gave cups and spoons, they were converted to grams with standard densities. Four dishes (siopao, Filipino empanada, mkate wa mayai, Jamaican patty) have no source with quantities yet, and their values are estimates.</p>
+  <p>The quantities were read from search-engine extracts of each cited page rather than from the page itself. Each recipe's notes say what was converted or assumed, and anything marked low confidence deserves a second look.</p>
 
   <h2>The catalogue</h2>
   <div class="table-wrap"><table id="table"><thead></thead><tbody></tbody></table></div>
@@ -543,6 +548,7 @@ function select(d) {
       <dt>Filling</dt><dd style="white-space:normal">${d.filling}</dd>
     </dl>
     <p class="note">${d.note}</p>
+    ${d.confidence && d.confidence !== "estimate" ? `<p class="src">Confidence: ${d.confidence}</p>` : ""}
     ${d.source ? `<p class="src">Dough from <a href="${d.source.url}" target="_blank" rel="noopener">${esc(d.source.title)}</a>${d.source.author ? ` (${esc(d.source.author)})` : ""}: ${esc(d.ingredients || "")}${d.calc_note ? `. <i>${esc(d.calc_note)}</i>` : ""}</p>` : `<p class="src">No published recipe found; values are an estimate.</p>`}
     <div class="near"><span style="color:var(--ink-2)">Closest wrappers:</span> ${near.map(o => `<a data-id="${o.id}">${o.name}</a> (${o.origin.split(" (")[0]})`).join(", ")}</div>`;
 }
