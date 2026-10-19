@@ -15,6 +15,7 @@ Currently I am working at [Valeo.AI](https://valeoai.github.io/) as a Research E
 - June '26: New pre-print: [Test-Time Trajectory Optimization for Autonomous Driving](https://arxiv.org/abs/2606.07170)
 - February '26: New pre-print: [Test-time conditioning with representation-aligned visual features](https://arxiv.org/abs/2602.03753)
 - January '26: [Driving on Registers](https://arxiv.org/abs/2601.05083) was accepted to [CVPR 2026](https://cvpr.thecvf.com/virtual/2026/poster/40172)
+- January '26: [R3DPA](https://arxiv.org/abs/2601.07692) was accepted to [ICRA 2026](https://2026.ieee-icra.org/)
 - January '26: Two new pre-prints available: [Driving on Registers](https://arxiv.org/abs/2601.05083) and [R3DPA: Leveraging 3D Representation Alignment and RGB Pretrained Priors for LiDAR Scene Generation](https://arxiv.org/abs/2601.07692)
 - July '25: [LOGen: Toward LiDAR Object Generation by Point Diffusion](https://github.com/valeoai/LOGen?tab=readme-ov-file) was accepted to [BMVC 2025](https://bmvc2025.bmva.org/)
 - July '25: Public release of our driving data conversion tool, [ScenarioMax](https://github.com/valeoai/ScenarioMax)
@@ -32,12 +33,12 @@ Currently I am working at [Valeo.AI](https://valeoai.github.io/) as a Research E
 - **Test-Time Conditioning with Representation-Aligned Visual Features (REPA-G)**  
   N. Sereyjol-Garros, **E. Kirby**, V. Letzelter, V. Besnier, N. Samet  
   *NeurIPS 2026* · [arXiv](https://arxiv.org/abs/2602.03753)
+- **R3DPA: Leveraging 3D Representation Alignment and RGB Pretrained Priors for LiDAR Scene Generation**  
+  N. Sereyjol-Garros, **E. Kirby**, V. Besnier, N. Samet  
+  *ICRA 2026* · [arXiv](https://arxiv.org/abs/2601.07692)
 - **Test-Time Trajectory Optimization for Autonomous Driving**  
   Y. Xu, É. Zablocki, Y. Yin, E. Ramzi, **E. Kirby**, A. Boulch, M. Cord  
   *arXiv preprint, 2026* · [arXiv](https://arxiv.org/abs/2606.07170)
-- **R3DPA: Leveraging 3D Representation Alignment and RGB Pretrained Priors for LiDAR Scene Generation**  
-  N. Sereyjol-Garros, **E. Kirby**, V. Besnier, N. Samet  
-  *arXiv preprint, 2026* · [arXiv](https://arxiv.org/abs/2601.07692)
 - **LOGen: Toward LiDAR Object Generation by Point Diffusion**  
   **E. Kirby**, M. Chen, R. Marlet, N. Samet  
   *BMVC 2025* · [arXiv](https://arxiv.org/abs/2412.07385) · [code](https://github.com/valeoai/LOGen)
