@@ -11,13 +11,42 @@ Currently I am working at [Valeo.AI](https://valeoai.github.io/) as a Research E
 * * *
 ## Updates
 
-- January '26: Two new pre-prints available: [Driving on Registers](https://arxiv.org/abs/2601.05083) and [Leveraging 3D Representation Alignment and RGB Pretrained Priors for LiDAR Scene Generation](https://arxiv.org/abs/2601.07692)
+- September '26: [REPA-G (Test-Time Conditioning with Representation-Aligned Visual Features)](https://arxiv.org/abs/2602.03753) was accepted to [NeurIPS 2026](https://neurips.cc/virtual/2026/poster/148903)
+- June '26: New pre-print: [Test-Time Trajectory Optimization for Autonomous Driving](https://arxiv.org/abs/2606.07170)
+- February '26: New pre-print: [Test-time conditioning with representation-aligned visual features](https://arxiv.org/abs/2602.03753)
+- January '26: [Driving on Registers](https://arxiv.org/abs/2601.05083) was accepted to [CVPR 2026](https://cvpr.thecvf.com/virtual/2026/poster/40172)
+- January '26: Two new pre-prints available: [Driving on Registers](https://arxiv.org/abs/2601.05083) and [R3DPA: Leveraging 3D Representation Alignment and RGB Pretrained Priors for LiDAR Scene Generation](https://arxiv.org/abs/2601.07692)
 - July '25: [LOGen: Toward LiDAR Object Generation by Point Diffusion](https://github.com/valeoai/LOGen?tab=readme-ov-file) was accepted to [BMVC 2025](https://bmvc2025.bmva.org/)
 - July '25: Public release of our driving data conversion tool, [ScenarioMax](https://github.com/valeoai/ScenarioMax)
 - July '25: Got married!
 - February '25: Joined [Valeo AI](https://valeoai.github.io/) as a Research Engineer
 - September '24: Completed my Masters in Machine Learning from the [IASD Program at PSL Research University](https://www.masteriasd.eu/en/)
 - April '24: Joined Valeo AI as a research intern
+
+* * *
+## Publications
+
+- **Driving on Registers**  
+  **E. Kirby**, A. Boulch, Y. Xu, Y. Yin, G. Puy, É. Zablocki, A. Bursuc, S. Gidaris, et al.  
+  *CVPR 2026* · [arXiv](https://arxiv.org/abs/2601.05083)
+- **Test-Time Conditioning with Representation-Aligned Visual Features (REPA-G)**  
+  N. Sereyjol-Garros, **E. Kirby**, V. Letzelter, V. Besnier, N. Samet  
+  *NeurIPS 2026* · [arXiv](https://arxiv.org/abs/2602.03753)
+- **Test-Time Trajectory Optimization for Autonomous Driving**  
+  Y. Xu, É. Zablocki, Y. Yin, E. Ramzi, **E. Kirby**, A. Boulch, M. Cord  
+  *arXiv preprint, 2026* · [arXiv](https://arxiv.org/abs/2606.07170)
+- **R3DPA: Leveraging 3D Representation Alignment and RGB Pretrained Priors for LiDAR Scene Generation**  
+  N. Sereyjol-Garros, **E. Kirby**, V. Besnier, N. Samet  
+  *arXiv preprint, 2026* · [arXiv](https://arxiv.org/abs/2601.07692)
+- **LOGen: Toward LiDAR Object Generation by Point Diffusion**  
+  **E. Kirby**, M. Chen, R. Marlet, N. Samet  
+  *BMVC 2025* · [arXiv](https://arxiv.org/abs/2412.07385) · [code](https://github.com/valeoai/LOGen)
+- **Intégration de connaissances structurées par synthèse de texte spécialisé**  
+  G. Piat, **E. Kirby**, J. Tourille, N. Semmar, A. Allauzen, H. Essafi  
+  *CORIA-TALN 2023* · [HAL](https://hal.science/hal-04130151/)
+- **HearHere: Smartphone Based Audio Localization Using Time Difference of Arrival**  
+  **E. Kirby**, S. Park, Y. Wang, Y. Chen  
+  *MobiCom 2016 (demo)* · [ACM](https://dl.acm.org/doi/abs/10.1145/2973750.2985625)
 
 * * *
 ## Work Experience
@@ -28,7 +57,7 @@ At Valeo AI I am the sole research engineer, wearing many hats and pushing forwa
 
 ### Zenly - Snap Inc
 
-In 2019 I moved to Paris to learn French, work at Zenly, and eat way too many French pastries. At Zenly I worked on the Conversations team alongside some of the smartest and most hard working people I have met in my life. We built so many creative features our users loved, like the Zenly Voice Notes, dozens of fun chat easter eggs, resizable (giant) text, the camera and Media Request feature (like the inverse of Snapchat). These features were used millons of time everyday and beloved by users. Unfortunately in 2022 Zenly was permanently shut down by Snap.
+In 2019 I moved to Paris to learn French, work at Zenly, and eat way too many French pastries. At Zenly I worked on the Conversations team alongside some of the smartest and most hard working people I have met in my life. We built so many creative features our users loved, like the Zenly Voice Notes, dozens of fun chat easter eggs, resizable (giant) text, the camera and Media Request feature (like the inverse of Snapchat). These features were used millions of times every day and beloved by users. Unfortunately in 2022 Zenly was permanently shut down by Snap.
 
 ### DRAFT - FanDuel
 

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dough Around Filling</title>
+<meta name="description" content="An interactive 3D map of the world's filled doughs — dumplings, pies, buns, pastries and sandwiches — placed by the hydration, fat, yeast, sugar and egg of their outer layer.">
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --hover: rgba(11,11,11,0.05);
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+    --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7;
+      --muted: #898781; --grid: #2c2c2a; --axis: #383835;
+      --border: rgba(255,255,255,0.10); --hover: rgba(255,255,255,0.06);
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+      --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7;
+    --muted: #898781; --grid: #2c2c2a; --axis: #383835;
+    --border: rgba(255,255,255,0.10); --hover: rgba(255,255,255,0.06);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 16px 64px; }
+  a { color: var(--s1); }
+  header .back { font-size: 13px; color: var(--ink-2); text-decoration: none; }
+  header .back:hover { text-decoration: underline; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 8px 0 8px; letter-spacing: -0.01em; }
+  .lede { color: var(--ink-2); max-width: 760px; margin: 0 0 24px; }
+  h2 { font-size: 18px; margin: 40px 0 8px; }
+  p { max-width: 760px; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 12px; }
+  .group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .group > .lbl { font-size: 12px; color: var(--muted); margin-right: 2px; text-transform: uppercase; letter-spacing: .04em; }
+  .group label { font-size: 13px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; }
+  button, select, input[type=search] {
+    font: inherit; font-size: 13px; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 10px; cursor: pointer;
+  }
+  input[type=search] { cursor: text; width: 180px; }
+  button:hover { background: var(--hover); }
+  button[aria-pressed="true"] { border-color: var(--ink-2); font-weight: 600; }
+
+  .stage {
+    position: relative; display: grid; grid-template-columns: 1fr 300px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  .viewport { position: relative; height: min(68vh, 640px); min-height: 420px; touch-action: none; }
+  .viewport canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  .viewport canvas:active { cursor: grabbing; }
+  .overlay { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .tick, .axis-title, .label {
+    position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+    font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .axis-title { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+  .label {
+    font-size: 11px; color: var(--ink); transform: translate(8px, -50%);
+    text-shadow: 0 0 3px var(--surface), 0 0 3px var(--surface), 0 0 2px var(--surface);
+  }
+  .label.strong { font-weight: 700; font-size: 12px; }
+  .tooltip {
+    position: absolute; pointer-events: none; z-index: 3; display: none;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.12); max-width: 260px;
+  }
+  .tooltip b { font-size: 13px; }
+  .tooltip .vals { display: grid; grid-template-columns: auto auto; gap: 0 12px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tooltip .vals span:nth-child(odd) { color: var(--ink-2); }
+  .hint { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--muted); pointer-events: none; }
+  .views { position: absolute; right: 10px; top: 10px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 70%; }
+  .views button { font-size: 12px; padding: 3px 8px; }
+
+  aside { border-left: 1px solid var(--border); padding: 16px; overflow-y: auto; height: min(68vh, 640px); min-height: 420px; }
+  aside h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+  .legend { list-style: none; margin: 0 0 18px; padding: 0; }
+  .legend li { display: flex; align-items: center; gap: 8px; padding: 3px 6px; margin: 0 -6px; border-radius: 6px; cursor: pointer; font-size: 13px; user-select: none; }
+  .legend li:hover { background: var(--hover); }
+  .legend li.off { color: var(--muted); }
+  .legend li.off .sw { opacity: .25; }
+  .legend .n { margin-left: auto; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .sw { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .legend svg { flex: none; }
+  .detail { border-top: 1px solid var(--border); padding-top: 14px; }
+  .detail .empty { color: var(--muted); font-size: 13px; }
+  .detail h4 { margin: 0; font-size: 17px; }
+  .detail .origin { color: var(--ink-2); font-size: 13px; margin-bottom: 10px; }
+  .detail dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0 0 10px; font-size: 13px; }
+  .detail dt { color: var(--ink-2); }
+  .detail dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .detail .note { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
+  .detail .near { font-size: 13px; }
+  a.dish { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
+  .detail .src { font-size: 12px; color: var(--ink-2); margin: 0 0 10px; }
+  .detail .near a { cursor: pointer; }
+  .bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--ink-2); vertical-align: middle; margin-left: 6px; opacity: .5; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  th { position: sticky; top: 0; background: var(--surface); color: var(--ink-2); font-weight: 600; cursor: pointer; user-select: none; }
+  th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  th[aria-sort="ascending"]::after { content: " ▲"; font-size: 10px; }
+  th[aria-sort="descending"]::after { content: " ▼"; font-size: 10px; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--hover); }
+  tbody tr.sel { background: var(--hover); font-weight: 600; }
+  tbody tr.dim { color: var(--muted); }
+  td .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+  .err { padding: 24px; color: var(--ink-2); }
+
+  @media (max-width: 860px) {
+    .stage { grid-template-columns: 1fr; }
+    aside { border-left: 0; border-top: 1px solid var(--border); height: auto; min-height: 0; }
+    .viewport { height: 440px; min-height: 0; }
+    input[type=search] { width: 140px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="/blog.html">← Blog</a>
+    <h1>Dough around filling</h1>
+    <p class="lede">Nearly every cuisine wraps something in wheat dough: dumplings, pies, buns, pastries, sandwiches. The fillings get the attention, but the wrapper is where the real variety is. Each point below is one dish, placed by the recipe for its outer layer: how wet the dough is, how much fat, yeast, sugar and egg it carries. Pick any three for the axes. Drag to rotate, scroll to zoom, click a point for details and the source recipe.</p>
+  </header>
+
+  <div class="controls">
+    <div class="group">
+      <span class="lbl">Colour by</span>
+      <button data-color="region" aria-pressed="true">Region</button>
+      <button data-color="leaven" aria-pressed="false">Leavening</button>
+      <button data-color="cluster" aria-pressed="false">Cluster</button>
+      <label id="k-pick" hidden>k <select id="k" aria-label="Number of clusters"><option>3</option><option>4</option><option>5</option><option selected>6</option><option>7</option><option>8</option></select></label>
+    </div>
+    <div class="group" id="axis-pickers">
+      <span class="lbl">Axes</span>
+      <label>Across <select data-axis="x" aria-label="Horizontal axis"></select></label>
+      <label>Up <select data-axis="y" aria-label="Vertical axis"></select></label>
+      <label>Depth <select data-axis="z" aria-label="Depth axis"></select></label>
+    </div>
+    <div class="group">
+      <input type="search" id="search" placeholder="Find a dish…" aria-label="Find a dish">
+      <button id="labels" aria-pressed="false">Show all names</button>
+      <button id="reset">Reset</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="viewport" id="viewport">
+      <div class="overlay" id="overlay"></div>
+      <div class="tooltip" id="tooltip"></div>
+      <div class="views" id="views">
+        <button data-view="iso">3D</button>
+        <button data-view="xy"></button>
+        <button data-view="xz"></button>
+        <button data-view="zy"></button>
+      </div>
+      <div class="hint">Drag to rotate · scroll to zoom · right-drag to pan</div>
+    </div>
+    <aside>
+      <h3 id="legend-title">Region</h3>
+      <ul class="legend" id="legend"></ul>
+      <h3>Cooking method (shape)</h3>
+      <ul class="legend" id="shape-legend"></ul>
+      <div class="detail" id="detail"><div class="empty">Click a point or a table row to see the dish.</div></div>
+    </aside>
+  </div>
+
+  <h2>What the axes mean</h2>
+  <p>All five are baker's percentages: grams per 100 g of wheat flour, white or wholemeal. Wrappers made from corn, rice, tapioca or rye are left out here; they behave differently enough to deserve their own chart.</p>
+  <p><b>Hydration</b> is all the liquid in the dough: water, broth, milk, and the water carried by eggs and butter. Stiff samosa and pie doughs sit around 30–40%. Dumpling doughs mostly 45–65%, bread doughs 55–75%. Coxinha dough (flour cooked in stock) and the batter used for warqa and brik sheets go well past 100%.</p>
+  <p><b>Fat</b> is the butter, lard, suet, oil or ghee worked into or laminated through the dough. Lean breads and dumplings sit near zero. Shortcrusts are around 40–65%, and the rough puff for a sausage roll passes 90%. Fat brushed between filo sheets after rolling is not counted.</p>
+  <p><b>Yeast</b> is given as instant-yeast equivalent. Chemically leavened doughs (baking powder or soda), steam-lifted laminated pastries and unleavened doughs all sit at zero; colour by <i>Leavening</i> to tell them apart.</p>
+  <p><b>Sugar</b> counts every sugar in the dough, including honey and syrup: near zero for most savoury wrappers, high for sweet buns and Cantonese mooncake skin. <b>Egg</b> is the weight of whole egg (or its yolk and white equivalent) per 100 g of flour. It is what sets fresh pasta and enriched breads apart from flour-and-water dumplings.</p>
+  <p>A little jitter is added in 3D so dishes with identical recipes don't hide each other. The table shows the exact values.</p>
+
+  <h2>What the clusters show</h2>
+  <p>Colour by <i>Cluster</i> to group the dishes with k-means. It uses all five measures, each scaled to its maximum so none dominates, and ignores region, cooking method and filling. The groups below are for six clusters; hierarchical clustering finds nearly the same ones.</p>
+  <p><b>Pies and quiche do end up together.</b> The short-and-flaky cluster holds <a class="dish" data-dish="Quiche Lorraine">Quiche Lorraine</a>, <a class="dish" data-dish="Cornish pasty">Cornish pasty</a>, <a class="dish" data-dish="Pork pie">Pork pie</a>, <a class="dish" data-dish="Tourtière">Tourtière</a>, <a class="dish" data-dish="Australian meat pie">Australian meat pie</a> and <a class="dish" data-dish="Apple pie">Apple pie</a>. It also holds pastries that travelled with empire and trade: <a class="dish" data-dish="Jamaican patty">Jamaican patty</a>, <a class="dish" data-dish="Nigerian meat pie">Nigerian meat pie</a> and the <a class="dish" data-dish="Filipino empanada">Filipino empanada</a>. Less expected are China's water-oil flaky pastry (<a class="dish" data-dish="Suzhou mooncake">Suzhou mooncake</a>, <a class="dish" data-dish="Wife cake">Wife cake</a>), the Malaysian <a class="dish" data-dish="Curry puff">Curry puff</a>, and, at most values of <i>k</i>, India's <a class="dish" data-dish="Samosa">Samosa</a> and <a class="dish" data-dish="Gujiya">Gujiya</a>. Rubbing ghee into the flour for a samosa (<i>moyan</i>) does the same job as rubbing butter in for shortcrust.</p>
+  <p><b>Steamed and baked buns are the same dough.</b> Chinese and Japanese buns (<a class="dish" data-dish="Char siu bao">Char siu bao</a>, <a class="dish" data-dish="Nikuman">Nikuman</a>, <a class="dish" data-dish="Siopao">Siopao</a>) cluster with the <a class="dish" data-dish="Hamburger">Hamburger</a> bun, <a class="dish" data-dish="Kolache (klobasnek)">Kolache (klobasnek)</a>, <a class="dish" data-dish="Bierock / Runza">Bierock / Runza</a> and <a class="dish" data-dish="Piroshki">Piroshki</a>. Steaming versus baking changes the crust, not the recipe. <a class="dish" data-dish="Bánh mì">Bánh mì</a>, the Mexican <a class="dish" data-dish="Torta">Torta</a> and the <a class="dish" data-dish="Cubano">Cubano</a> sit here too: three sandwich rolls each often traced back to French bread.</p>
+  <p><b>Dumplings look alike across Eurasia.</b> The largest group is the lean doughs, little more than flour and water. <a class="dish" data-dish="Jiaozi">Jiaozi</a>, <a class="dish" data-dish="Pelmeni">Pelmeni</a>, <a class="dish" data-dish="Khinkali">Khinkali</a>, <a class="dish" data-dish="Mantı">Mantı</a>, <a class="dish" data-dish="Momo">Momo</a>, <a class="dish" data-dish="Buuz">Buuz</a> and <a class="dish" data-dish="Pierogi">Pierogi</a> are close to interchangeable on these numbers, which fits the story of the dumpling spreading along the Silk Road. The baguette in a <a class="dish" data-dish="Jambon-beurre">Jambon-beurre</a> and Naples' <a class="dish" data-dish="Calzone">Calzone</a> land here too. Long, slow fermentation needs so little yeast that compositionally they are lean doughs that happen to rise.</p>
+  <p><b>Egg makes pasta.</b> <a class="dish" data-dish="Ravioli">Ravioli</a> and <a class="dish" data-dish="Tortellini">Tortellini</a> group with Turkey's <a class="dish" data-dish="Su böreği">Su böreği</a>, whose sheets are an egg dough boiled like pasta before layering.</p>
+  <p><b>Two small outlier groups.</b> <a class="dish" data-dish="Cantonese mooncake">Cantonese mooncake</a>, <a class="dish" data-dish="Bánh bao">Bánh bao</a> and the Bolivian <a class="dish" data-dish="Salteña">Salteña</a> stand apart on sugar. <a class="dish" data-dish="Pastilla">Pastilla</a>, <a class="dish" data-dish="Brik">Brik</a> and <a class="dish" data-dish="Coxinha">Coxinha</a> stand apart on liquid: the first two use sheets made from a dabbed batter, and coxinha dough is flour cooked in stock.</p>
+  <p><a class="dish" data-dish="Pain au chocolat">Pain au chocolat</a> is laminated like puff pastry and yeasted like a bun, so it switches clusters as <i>k</i> changes; samosa and gujiya sit on the edge between pastry and lean dough the same way. With one recipe per dish, read the boundaries loosely: the dishes near a cluster's edge could fall either way with a different cook's recipe.</p>
+
+  <h2>Sources</h2>
+  <p>Each dish's numbers are computed from one published recipe for its dough, linked in the detail panel and the table. That recipe stands in for the dish, but cooks disagree: a Shanghainese grandmother's xiaolongbao and a restaurant's can differ by 20 points of hydration. Where a recipe gave cups and spoons, they were converted to grams with standard densities. Four dishes (siopao, Filipino empanada, mkate wa mayai, Jamaican patty) have no source with quantities yet, and their values are estimates.</p>
+  <p>The quantities were read from search-engine extracts of each cited page rather than from the page itself. Each recipe's notes say what was converted or assumed, and anything marked low confidence deserves a second look.</p>
+
+  <h2>The catalogue</h2>
+  <div class="table-wrap"><table id="table"><thead></thead><tbody></tbody></table></div>
+</div>
+
+<script src="data.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const DATA = window.BREAD_DATA.map((d, i) => ({ ...d, sugar: d.sugar ?? 0, egg: d.egg ?? 0, id: i }));
+
+// ---- axes ------------------------------------------------------------------
+// Five measures; any three go on the cube's axes. The cube spans 0..S on every axis:
+// x runs across, y is up, z runs towards the viewer.
+const MEASURES = {
+  hydration: { label: "Hydration" },
+  fat:       { label: "Fat" },
+  yeast:     { label: "Yeast" },
+  sugar:     { label: "Sugar" },
+  egg:       { label: "Egg" },
+};
+// Each scale runs from 0 to a round number just above the largest value in the data.
+for (const [k, m] of Object.entries(MEASURES)) {
+  const max = Math.max(...DATA.map(d => d[k]));
+  const step = [0.25, 0.5, 1, 2, 5, 10, 15, 20, 25, 50].find(st => max / st <= 7);
+  m.max = Math.ceil(max / step) * step || 1;
+  m.ticks = Array.from({ length: Math.round(m.max / step) + 1 }, (_, i) => +(i * step).toFixed(2));
+}
+const axes = { x: "hydration", y: "fat", z: "yeast" };
+const S = 10;
+const scale = (axis, v) => v / MEASURES[axes[axis]].max * S;
+
+// ---- colour encodings -------------------------------------------------------
+// Categories are assigned palette slots in a fixed order; they never re-cycle.
+const ENCODINGS = {
+  region: {
+    title: "Region",
+    cats: ["East Asia", "South & Southeast Asia", "Middle East & Central Asia", "Europe", "Africa", "Latin America & Caribbean", "North America & Oceania"],
+    slots: [1, 2, 3, 7, 4, 5, 6],
+  },
+  leaven: {
+    title: "Leavening",
+    cats: ["none", "yeast", "chemical", "steam"],
+    names: { none: "Unleavened", yeast: "Yeast", chemical: "Chemical (baking powder/soda)", steam: "Steam (laminated)" },
+    slots: [1, 2, 3, 7],
+  },
+};
+const COOKS = ["baked", "fried", "steamed", "boiled", "griddled"];
+
+// ---- clustering -------------------------------------------------------------------
+// k-means on all five measures, each divided by its maximum so they weigh equally.
+// Seeded k-means++ with many restarts, so the result is the same on every load.
+const FEATURES = Object.keys(MEASURES);
+const VEC = DATA.map(d => FEATURES.map(k => d[k] / MEASURES[k].max));
+function kmeans(X, k, restarts = 60) {
+  let seed = 7;
+  const rand = () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const d2 = (a, b) => a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0);
+  let best = null;
+  for (let r = 0; r < restarts; r++) {
+    const C = [X[Math.floor(rand() * X.length)]];
+    while (C.length < k) {
+      const w = X.map(x => Math.min(...C.map(c => d2(x, c))));
+      let t = rand() * w.reduce((a, b) => a + b, 0), i = 0;
+      while ((t -= w[i]) > 0 && i < X.length - 1) i++;
+      C.push(X[i]);
+    }
+    let L = [], changed = true;
+    for (let it = 0; it < 100 && changed; it++) {
+      const L2 = X.map(x => C.reduce((bi, c, j) => d2(x, c) < d2(x, C[bi]) ? j : bi, 0));
+      changed = L2.some((l, i) => l !== L[i]); L = L2;
+      for (let j = 0; j < k; j++) {
+        const m = X.filter((_, i) => L[i] === j);
+        if (m.length) C[j] = m[0].map((_, f) => m.reduce((s, x) => s + x[f], 0) / m.length);
+      }
+    }
+    const inertia = X.reduce((s, x, i) => s + d2(x, C[L[i]]), 0);
+    if (!best || inertia < best.inertia - 1e-9) best = { L, C, inertia };
+  }
+  return best;
+}
+// Name a cluster after what stands out in its average recipe.
+function clusterName(c) {
+  const v = Object.fromEntries(FEATURES.map((k, i) => [k, c[i] * MEASURES[k].max]));
+  if (v.hydration > 110) return "Batter-thin and very wet";
+  if (v.egg > 25) return "Egg doughs";
+  if (v.sugar > 20) return "Sweet doughs";
+  if (v.fat > 30) return "Short and flaky pastry";
+  if (v.yeast > 0.7) return "Yeasted breads and buns";
+  return "Lean doughs";
+}
+function runClusters(k) {
+  const { L, C } = kmeans(VEC, k);
+  const base = C.map(clusterName);
+  // Two clusters can get the same name at higher k; number the repeats.
+  const names = base.map((n, j) => base.filter(m => m === n).length > 1 ? `${n} ${base.slice(0, j + 1).filter(m => m === n).length}` : n);
+  DATA.forEach((d, i) => { d.cluster = names[L[i]]; });
+  const cats = [...new Set(names)].sort((a, b) => DATA.filter(d => d.cluster === b).length - DATA.filter(d => d.cluster === a).length);
+  ENCODINGS.cluster = { title: "Cluster", cats, slots: cats.map((_, i) => i + 1) };
+  hidden.cluster = new Set();
+}
+
+let colorBy = "region";
+const hidden = { region: new Set(), leaven: new Set() };
+runClusters(6);
+let selected = null, hovered = null, showAll = false, query = "";
+
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const catOf = d => d[colorBy];
+const catName = (enc, c) => (ENCODINGS[enc].names || {})[c] || c;
+const slotVar = (enc, c) => `--s${ENCODINGS[enc].slots[ENCODINGS[enc].cats.indexOf(c)]}`;
+const colorOf = d => css(slotVar(colorBy, catOf(d)));
+const isVisible = d => !hidden[colorBy].has(catOf(d));
+const matches = d => !query || (d.name + " " + d.origin + " " + d.filling).toLowerCase().includes(query);
+
+// ---- scene ------------------------------------------------------------------
+const viewport = document.getElementById("viewport");
+const overlay = document.getElementById("overlay");
+const tooltip = document.getElementById("tooltip");
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+viewport.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 2000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x888888, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+sun.position.set(12, 20, 16);
+scene.add(sun);
+
+// Grid on the three back planes, rebuilt when the theme changes.
+const chrome = new THREE.Group();
+scene.add(chrome);
+function buildChrome() {
+  chrome.clear();
+  const grid = new THREE.LineBasicMaterial({ color: css("--grid") });
+  const axis = new THREE.LineBasicMaterial({ color: css("--axis") });
+  const seg = (pts, mat) => chrome.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(...p))), mat));
+  const g = [];
+  for (const t of MEASURES[axes.x].ticks) { const x = scale("x", t); g.push([x, 0, 0], [x, 0, S], [x, 0, 0], [x, S, 0]); }
+  for (const t of MEASURES[axes.y].ticks) { const y = scale("y", t); g.push([0, y, 0], [S, y, 0], [0, y, 0], [0, y, S]); }
+  for (const t of MEASURES[axes.z].ticks) { const z = scale("z", t); g.push([0, 0, z], [S, 0, z], [0, 0, z], [0, S, z]); }
+  seg(g, grid);
+  seg([[0, 0, 0], [S, 0, 0], [0, 0, 0], [0, S, 0], [0, 0, 0], [0, 0, S], [S, 0, 0], [S, 0, S], [0, 0, S], [S, 0, S]], axis);
+}
+
+// One mesh per dish; shape encodes cooking method.
+const R = 0.2;
+const GEOMS = {
+  baked:    new THREE.BoxGeometry(R * 1.7, R * 1.7, R * 1.7),
+  fried:    new THREE.OctahedronGeometry(R * 1.35),
+  steamed:  new THREE.SphereGeometry(R, 24, 16),
+  boiled:   new THREE.ConeGeometry(R * 1.1, R * 2, 20),
+  griddled: new THREE.CylinderGeometry(R * 1.25, R * 1.25, R * 0.8, 24),
+};
+
+// Deterministic jitter so identical recipes (jiaozi / gyoza / pelmeni …) don't overlap.
+function jitter(i, k) { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return (x - Math.floor(x) - 0.5) * 0.35; }
+
+const meshes = [];
+const stemGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0)]);
+for (const d of DATA) {
+  const mat = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.05, transparent: true });
+  const m = new THREE.Mesh(GEOMS[d.cook], mat);
+  m.userData.d = d;
+  m.userData.target = new THREE.Vector3();
+  // Stem from the point down to the floor helps read depth.
+  const stem = new THREE.Line(stemGeo, new THREE.LineBasicMaterial({ transparent: true }));
+  m.userData.stem = stem;
+  scene.add(m, stem);
+  meshes.push(m);
+}
+
+function placeTargets(instant) {
+  for (const m of meshes) {
+    const d = m.userData.d;
+    m.userData.target.set(
+      Math.max(scale("x", d[axes.x]) + jitter(d.id, 1), 0.05),
+      Math.max(scale("y", d[axes.y]) + jitter(d.id, 2) * 0.5, 0.05),
+      Math.max(scale("z", d[axes.z]) + jitter(d.id, 3), 0.05));
+    if (instant) m.position.copy(m.userData.target);
+  }
+  moving = true;
+}
+// Glide points to new positions after an axis change.
+let moving = false;
+function stepPoints() {
+  if (!moving) return;
+  moving = false;
+  for (const m of meshes) {
+    m.position.lerp(m.userData.target, 0.12);
+    if (m.position.distanceToSquared(m.userData.target) > 1e-5) moving = true;
+    else m.position.copy(m.userData.target);
+    const stem = m.userData.stem;
+    stem.position.set(m.position.x, 0, m.position.z);
+    stem.scale.y = m.position.y;
+  }
+}
+
+function restyle() {
+  const muted = css("--muted");
+  for (const m of meshes) {
+    const d = m.userData.d;
+    const on = isVisible(d) && matches(d);
+    const focus = selected === d || hovered === d;
+    m.material.color.set(colorOf(d));
+    m.material.opacity = on ? 1 : 0.1;
+    m.material.depthWrite = on;
+    m.scale.setScalar(focus ? 1.6 : 1);
+    m.userData.stem.material.color.set(focus ? colorOf(d) : muted);
+    m.userData.stem.material.opacity = on ? (focus ? 0.9 : 0.25) : 0.04;
+    m.raycastable = on;
+  }
+}
+
+// ---- HTML overlay: ticks, axis titles, labels -----------------------------------
+const overlayItems = [];
+function addOverlay(cls, text, pos, extra) {
+  const el = document.createElement("div");
+  el.className = cls;
+  el.textContent = text;
+  overlay.appendChild(el);
+  const item = { el, pos: new THREE.Vector3(...pos), ...extra };
+  overlayItems.push(item);
+  return item;
+}
+const AX = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) };
+let axisItems = [];
+function buildTicks() {
+  for (const it of axisItems) { it.el.remove(); overlayItems.splice(overlayItems.indexOf(it), 1); }
+  const M = k => MEASURES[axes[k]];
+  axisItems = [
+    ...M("x").ticks.map(t => addOverlay("tick", t + "%", [scale("x", t), -0.35, S + 0.35], { axis: AX.x })),
+    ...M("y").ticks.slice(1).map(t => addOverlay("tick", t + "%", [-0.5, scale("y", t), S + 0.2], { axis: AX.y })),
+    ...M("z").ticks.slice(1).map(t => addOverlay("tick", t + "%", [S + 0.55, -0.35, scale("z", t)], { axis: AX.z })),
+    addOverlay("axis-title", M("x").label, [S / 2, -1.1, S + 1.2], { axis: AX.x }),
+    addOverlay("axis-title", M("y").label, [-1.2, S + 0.6, S + 0.2], { axis: AX.y }),
+    addOverlay("axis-title", M("z").label, [S + 1.6, -1.0, S / 2], { axis: AX.z }),
+  ];
+}
+const labels = meshes.map(m => addOverlay("label", m.userData.d.name, [0, 0, 0], { mesh: m }));
+
+const v = new THREE.Vector3();
+const viewDir = new THREE.Vector3();
+function placeOverlay(w, h) {
+  camera.getWorldDirection(viewDir);
+  for (const it of overlayItems) {
+    // Hide an axis's ticks when we are looking straight down it: they'd all stack up.
+    let show = !it.axis || Math.abs(viewDir.dot(it.axis)) < 0.9;
+    if (it.mesh) {
+      const d = it.mesh.userData.d;
+      const on = isVisible(d) && matches(d);
+      const focus = d === selected || d === hovered;
+      show = focus || (on && (showAll || (query && matches(d))));
+      it.el.classList.toggle("strong", focus);
+      v.copy(it.mesh.position);
+    } else v.copy(it.pos);
+    v.project(camera);
+    if (!show || v.z > 1) { it.el.style.display = "none"; continue; }
+    it.el.style.display = "";
+    it.el.style.left = ((v.x + 1) / 2 * w).toFixed(1) + "px";
+    it.el.style.top = ((1 - v.y) / 2 * h).toFixed(1) + "px";
+  }
+}
+
+// ---- camera views -------------------------------------------------------------
+const CENTER = new THREE.Vector3(S / 2, S / 2 - 0.5, S / 2);
+// Each view is a direction from the centre plus a field of view. The flat views use a
+// very narrow FOV from far away, which is close to orthographic, so front and back
+// grid lines line up. Distance is scaled with the FOV to keep the cube the same size.
+const VIEWS = {
+  iso: { dir: new THREE.Vector3(17, 10, 20), fov: 38 },
+  xy:  { dir: new THREE.Vector3(0, 0, 1), fov: 4 },      // look down the depth axis
+  xz:  { dir: new THREE.Vector3(0, 1, 0.0001), fov: 4 }, // look down the vertical axis
+  zy:  { dir: new THREE.Vector3(1, 0, 0), fov: 4 },      // look down the horizontal axis
+};
+const FIT = 27 * Math.tan(THREE.MathUtils.degToRad(38) / 2);
+// Narrow (portrait) viewports need the camera further back for the cube to fit across.
+const aspectK = () => Math.max(1, 1.3 / camera.aspect);
+const distFor = fov => FIT / Math.tan(THREE.MathUtils.degToRad(fov) / 2) * aspectK();
+let tween = null;
+function goTo(name, instant) {
+  const { dir, fov } = VIEWS[name];
+  const to = { dir: dir.clone().normalize(), fov };
+  const from = { dir: camera.position.clone().sub(controls.target).normalize(), fov: camera.fov, target: controls.target.clone() };
+  tween = { t: instant ? 1 : 0, from, to };
+  step(0);
+}
+function step(dt) {
+  if (!tween) return;
+  tween.t = Math.min(1, tween.t + dt);
+  const k = 1 - Math.pow(1 - tween.t, 3);
+  const { from, to } = tween;
+  camera.fov = from.fov + (to.fov - from.fov) * k;
+  camera.updateProjectionMatrix();
+  controls.target.lerpVectors(from.target, CENTER, k);
+  const dir = from.dir.clone().lerp(to.dir, k).normalize();
+  camera.position.copy(controls.target).addScaledVector(dir, distFor(camera.fov));
+  controls.minDistance = distFor(camera.fov) * 0.25;
+  controls.maxDistance = distFor(camera.fov) * 2.5;
+  if (tween.t === 1) tween = null;
+}
+document.getElementById("views").addEventListener("click", e => { if (e.target.dataset.view) goTo(e.target.dataset.view); });
+controls.addEventListener("start", () => { tween = null; });
+
+// ---- picking -------------------------------------------------------------------
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+function pick(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  // Pad the hit target beyond the mark: test a slightly enlarged copy first, then nearest in screen space.
+  const hits = ray.intersectObjects(meshes.filter(m => m.raycastable), false);
+  if (hits.length) return hits[0].object.userData.d;
+  let best = null, bestD = 14;
+  for (const m of meshes) {
+    if (!m.raycastable) continue;
+    v.copy(m.position).project(camera);
+    const px = (v.x + 1) / 2 * r.width, py = (1 - v.y) / 2 * r.height;
+    const dist = Math.hypot(px - (e.clientX - r.left), py - (e.clientY - r.top));
+    if (dist < bestD) { bestD = dist; best = m.userData.d; }
+  }
+  return best;
+}
+
+const fmtVals = d => `<div class="vals">${Object.entries(MEASURES).map(([k, m]) => `<span>${m.label}</span><span>${d[k]}%</span>`).join("")}</div>`;
+renderer.domElement.addEventListener("pointermove", e => {
+  if (e.buttons) { tooltip.style.display = "none"; return; }
+  const d = pick(e);
+  if (d !== hovered) { hovered = d; restyle(); }
+  if (!d) { tooltip.style.display = "none"; return; }
+  tooltip.innerHTML = `<b>${d.name}</b><div style="color:var(--ink-2)">${d.origin} · ${d.cook}</div>${fmtVals(d)}`;
+  const r = viewport.getBoundingClientRect();
+  let x = e.clientX - r.left + 14, y = e.clientY - r.top + 14;
+  tooltip.style.display = "block";
+  if (x + tooltip.offsetWidth > r.width - 8) x = e.clientX - r.left - tooltip.offsetWidth - 14;
+  if (y + tooltip.offsetHeight > r.height - 8) y = e.clientY - r.top - tooltip.offsetHeight - 14;
+  tooltip.style.left = x + "px"; tooltip.style.top = y + "px";
+});
+renderer.domElement.addEventListener("pointerleave", () => { hovered = null; tooltip.style.display = "none"; restyle(); });
+let downAt = null;
+renderer.domElement.addEventListener("pointerdown", e => { downAt = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener("pointerup", e => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 4) return;
+  select(pick(e));
+});
+
+// ---- detail panel -----------------------------------------------------------------
+const detail = document.getElementById("detail");
+function neighbours(d, n) {
+  const dist = o => Math.hypot(...VEC[o.id].map((v, i) => v - VEC[d.id][i]));
+  return DATA.filter(o => o !== d).sort((a, b) => dist(a) - dist(b)).slice(0, n);
+}
+const bar = (v, max) => `<span class="bar" style="width:${Math.max(2, v / max * 90)}px"></span>`;
+function select(d) {
+  selected = d;
+  restyle();
+  renderTable();
+  if (!d) { detail.innerHTML = '<div class="empty">Click a point or a table row to see the dish.</div>'; return; }
+  const near = neighbours(d, 4);
+  detail.innerHTML = `
+    <h4>${d.name}</h4>
+    <div class="origin">${d.origin}</div>
+    <dl>
+      ${Object.entries(MEASURES).map(([k, m]) => `<dt>${m.label}</dt><dd>${d[k]}%${bar(d[k], m.max)}</dd>`).join("")}
+      <dt>Cluster</dt><dd>${d.cluster}</dd>
+      <dt>Leavening</dt><dd>${catName("leaven", d.leaven)}</dd>
+      <dt>Cooked</dt><dd>${d.cook}</dd>
+      <dt>Base</dt><dd>${d.base}</dd>
+      <dt>Filling</dt><dd style="white-space:normal">${d.filling}</dd>
+    </dl>
+    <p class="note">${d.note}</p>
+    ${d.confidence && d.confidence !== "estimate" ? `<p class="src">Confidence: ${d.confidence}</p>` : ""}
+    ${d.source ? `<p class="src">Dough from <a href="${d.source.url}" target="_blank" rel="noopener">${esc(d.source.title)}</a>${d.source.author ? ` (${esc(d.source.author)})` : ""}: ${esc(d.ingredients || "")}${d.calc_note ? `. <i>${esc(d.calc_note)}</i>` : ""}</p>` : `<p class="src">No published recipe found; values are an estimate.</p>`}
+    <div class="near"><span style="color:var(--ink-2)">Closest wrappers (all five measures):</span> ${near.map(o => `<a data-id="${o.id}">${o.name}</a> (${o.origin.split(" (")[0]})`).join(", ")}</div>`;
+}
+detail.addEventListener("click", e => { if (e.target.dataset.id) select(DATA[+e.target.dataset.id]); });
+document.addEventListener("click", e => {
+  const name = e.target.dataset && e.target.dataset.dish; if (!name) return;
+  select(DATA.find(d => d.name === name));
+  viewport.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+// ---- legends ----------------------------------------------------------------------
+const SHAPE_ICONS = {
+  baked: '<rect x="2" y="2" width="10" height="10" rx="1"/>',
+  fried: '<path d="M7 1 L13 7 L7 13 L1 7 Z"/>',
+  steamed: '<circle cx="7" cy="7" r="5.5"/>',
+  boiled: '<path d="M7 1.5 L12.5 12 L1.5 12 Z"/>',
+  griddled: '<rect x="1" y="4.5" width="12" height="5" rx="1"/>',
+};
+function renderLegend() {
+  const enc = ENCODINGS[colorBy];
+  document.getElementById("legend-title").textContent = enc.title + " (colour) — click to toggle";
+  const ul = document.getElementById("legend");
+  ul.innerHTML = enc.cats.map(c => {
+    const n = DATA.filter(d => d[colorBy] === c).length;
+    return `<li data-cat="${c}" class="${hidden[colorBy].has(c) ? "off" : ""}" role="button" aria-pressed="${!hidden[colorBy].has(c)}">
+      <span class="sw" style="background:var(${slotVar(colorBy, c)})"></span>${catName(colorBy, c)}<span class="n">${n}</span></li>`;
+  }).join("");
+  document.getElementById("shape-legend").innerHTML = COOKS.map(c =>
+    `<li style="cursor:default"><svg width="14" height="14" viewBox="0 0 14 14" fill="var(--ink-2)">${SHAPE_ICONS[c]}</svg>${c[0].toUpperCase() + c.slice(1)}<span class="n">${DATA.filter(d => d.cook === c).length}</span></li>`).join("");
+}
+document.getElementById("legend").addEventListener("click", e => {
+  const li = e.target.closest("li"); if (!li) return;
+  const set = hidden[colorBy], c = li.dataset.cat;
+  // Clicking the only visible category shows everything again.
+  if (!set.has(c) && set.size === ENCODINGS[colorBy].cats.length - 1) set.clear();
+  else if (e.altKey || e.metaKey) { set.clear(); ENCODINGS[colorBy].cats.forEach(k => k !== c && set.add(k)); }
+  else set.has(c) ? set.delete(c) : set.add(c);
+  refresh();
+});
+document.querySelectorAll("[data-color]").forEach(b => b.addEventListener("click", () => {
+  colorBy = b.dataset.color;
+  document.getElementById("k-pick").hidden = colorBy !== "cluster";
+  document.querySelectorAll("[data-color]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  refresh();
+}));
+document.getElementById("k").addEventListener("change", e => {
+  runClusters(+e.target.value);
+  refresh();
+  if (selected) select(selected);
+});
+document.getElementById("search").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); refresh(); });
+document.getElementById("labels").addEventListener("click", e => {
+  showAll = !showAll; e.target.setAttribute("aria-pressed", showAll);
+});
+document.getElementById("reset").addEventListener("click", () => {
+  Object.values(hidden).forEach(s => s.clear());
+  query = ""; document.getElementById("search").value = "";
+  Object.assign(axes, { x: "hydration", y: "fat", z: "yeast" });
+  select(null); applyAxes(); goTo("iso"); refresh();
+});
+
+// ---- axis pickers -----------------------------------------------------------------
+const pickers = [...document.querySelectorAll("[data-axis]")];
+function applyAxes(instant) {
+  for (const sel of pickers) {
+    sel.innerHTML = Object.entries(MEASURES).map(([k, m]) => `<option value="${k}"${axes[sel.dataset.axis] === k ? " selected" : ""}>${m.label}</option>`).join("");
+  }
+  const L = a => MEASURES[axes[a]].label;
+  document.querySelector('[data-view="xy"]').textContent = `${L("x")} × ${L("y")}`;
+  document.querySelector('[data-view="xz"]').textContent = `${L("x")} × ${L("z")}`;
+  document.querySelector('[data-view="zy"]').textContent = `${L("z")} × ${L("y")}`;
+  buildChrome();
+  buildTicks();
+  placeTargets(instant);
+  if (selected) select(selected);
+}
+for (const sel of pickers) sel.addEventListener("change", () => {
+  const a = sel.dataset.axis, k = sel.value;
+  // Picking a measure that's already on another axis swaps the two.
+  const other = Object.keys(axes).find(b => b !== a && axes[b] === k);
+  if (other) axes[other] = axes[a];
+  axes[a] = k;
+  applyAxes();
+});
+
+// ---- table ------------------------------------------------------------------------
+const COLS = [
+  ["name", "Dish"], ["origin", "Origin"], ["region", "Region"], ["cook", "Cooked"], ["leaven", "Leavening"],
+  ["hydration", "Hydration %", true], ["fat", "Fat %", true], ["yeast", "Yeast %", true], ["sugar", "Sugar %", true], ["egg", "Egg %", true],
+  ["cluster", "Cluster"], ["base", "Base"], ["filling", "Filling"], ["source", "Source"],
+];
+let sortKey = "hydration", sortDir = 1;
+const table = document.getElementById("table");
+table.tHead.innerHTML = "<tr>" + COLS.map(([k, l, num]) => `<th data-k="${k}" class="${num ? "num" : ""}">${l}</th>`).join("") + "</tr>";
+table.tHead.addEventListener("click", e => {
+  const k = e.target.dataset.k; if (!k) return;
+  sortDir = k === sortKey ? -sortDir : (COLS.find(c => c[0] === k)[2] ? -1 : 1);
+  sortKey = k; renderTable();
+});
+table.tBodies[0].addEventListener("click", e => {
+  const tr = e.target.closest("tr"); if (!tr || e.target.closest("a")) return;
+  const d = DATA[+tr.dataset.id];
+  select(selected === d ? null : d);
+  if (selected) viewport.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+const sortVal = d => sortKey === "source" ? (d.source ? d.source.author || d.source.title : "") : d[sortKey];
+function renderTable() {
+  for (const th of table.tHead.rows[0].cells) th.setAttribute("aria-sort", th.dataset.k === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none");
+  const rows = [...DATA].sort((a, b) => {
+    const x = sortVal(a), y = sortVal(b);
+    return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * sortDir || a.name.localeCompare(b.name);
+  });
+  table.tBodies[0].innerHTML = rows.map(d => `<tr data-id="${d.id}" class="${d === selected ? "sel" : ""} ${isVisible(d) && matches(d) ? "" : "dim"}">` +
+    COLS.map(([k, , num]) => {
+      let val = k === "leaven" ? catName("leaven", d[k])
+        : k === "source" ? (d.source ? `<a href="${d.source.url}" target="_blank" rel="noopener">${esc(d.source.author || d.source.title)}</a>` : "—")
+        : d[k];
+      if (k === colorBy) val = `<span class="dot" style="background:var(${slotVar(colorBy, d[colorBy])})"></span>${val}`;
+      return `<td class="${num ? "num" : ""}">${val}</td>`;
+    }).join("") + "</tr>").join("");
+}
+
+function refresh() { renderLegend(); renderTable(); restyle(); }
+
+// ---- loop -------------------------------------------------------------------------
+function resize() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  const k0 = aspectK();
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  const k = aspectK() / k0;
+  camera.position.sub(controls.target).multiplyScalar(k).add(controls.target);
+  controls.minDistance *= k; controls.maxDistance *= k;
+}
+new ResizeObserver(resize).observe(viewport);
+
+function frame() {
+  step(0.04);
+  stepPoints();
+  controls.update();
+  renderer.render(scene, camera);
+  placeOverlay(viewport.clientWidth, viewport.clientHeight);
+  requestAnimationFrame(frame);
+}
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { buildChrome(); restyle(); });
+new MutationObserver(() => { buildChrome(); restyle(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+applyAxes(true);
+stepPoints();
+resize();
+goTo("iso", true);
+refresh();
+frame();
+</script>
+<noscript><p class="err">This page needs JavaScript and WebGL to draw the 3D chart.</p></noscript>
+</body>
+</html>
