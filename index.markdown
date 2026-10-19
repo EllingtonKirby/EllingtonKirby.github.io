@@ -11,6 +11,7 @@ Currently I am working at [Valeo.AI](https://valeoai.github.io/) as a Research E
 * * *
 ## Updates
 
+- September '26: [REPA-G (Test-Time Conditioning with Representation-Aligned Visual Features)](https://arxiv.org/abs/2602.03753) was accepted to [NeurIPS 2026](https://neurips.cc/virtual/2026/poster/148903)
 - June '26: New pre-print: [Test-Time Trajectory Optimization for Autonomous Driving](https://arxiv.org/abs/2606.07170)
 - February '26: New pre-print: [Test-time conditioning with representation-aligned visual features](https://arxiv.org/abs/2602.03753)
 - January '26: [Driving on Registers](https://arxiv.org/abs/2601.05083) was accepted to [CVPR 2026](https://cvpr.thecvf.com/virtual/2026/poster/40172)
@@ -28,12 +29,12 @@ Currently I am working at [Valeo.AI](https://valeoai.github.io/) as a Research E
 - **Driving on Registers**  
   **E. Kirby**, A. Boulch, Y. Xu, Y. Yin, G. Puy, É. Zablocki, A. Bursuc, S. Gidaris, et al.  
   *CVPR 2026* · [arXiv](https://arxiv.org/abs/2601.05083)
+- **Test-Time Conditioning with Representation-Aligned Visual Features (REPA-G)**  
+  N. Sereyjol-Garros, **E. Kirby**, V. Letzelter, V. Besnier, N. Samet  
+  *NeurIPS 2026* · [arXiv](https://arxiv.org/abs/2602.03753)
 - **Test-Time Trajectory Optimization for Autonomous Driving**  
   Y. Xu, É. Zablocki, Y. Yin, E. Ramzi, **E. Kirby**, A. Boulch, M. Cord  
   *arXiv preprint, 2026* · [arXiv](https://arxiv.org/abs/2606.07170)
-- **Test-time conditioning with representation-aligned visual features**  
-  N. Sereyjol-Garros, **E. Kirby**, V. Letzelter, V. Besnier, N. Samet  
-  *arXiv preprint, 2026* · [arXiv](https://arxiv.org/abs/2602.03753)
 - **R3DPA: Leveraging 3D Representation Alignment and RGB Pretrained Priors for LiDAR Scene Generation**  
   N. Sereyjol-Garros, **E. Kirby**, V. Besnier, N. Samet  
   *arXiv preprint, 2026* · [arXiv](https://arxiv.org/abs/2601.07692)
