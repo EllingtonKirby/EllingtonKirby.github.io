@@ -11,6 +11,7 @@ Currently I am working at [Valeo.AI](https://valeoai.github.io/) as a Research E
 * * *
 ## Updates
 
+- November '26: New pre-print in collaboration with Social Chaos Labs: [Beyond Infraction Scores: Failure-Boundary Profiles for Closed-Loop Evaluation of Driving and Robot Navigation Agents](https://arxiv.org/abs/2611.06453)
 - September '26: [REPA-G (Test-Time Conditioning with Representation-Aligned Visual Features)](https://arxiv.org/abs/2602.03753) was accepted to [NeurIPS 2026](https://neurips.cc/virtual/2026/poster/148903)
 - June '26: New pre-print: [Test-Time Trajectory Optimization for Autonomous Driving](https://arxiv.org/abs/2606.07170)
 - February '26: New pre-print: [Test-time conditioning with representation-aligned visual features](https://arxiv.org/abs/2602.03753)
